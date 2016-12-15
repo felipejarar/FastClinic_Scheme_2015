@@ -1,0 +1,218 @@
+#lang racket
+
+(require "FuncionesGenerales.rkt")
+(require (planet neil/csv:2:0))
+
+(provide BDTratamientoDiagnosticos)
+(provide createTratamientoDiagnostico)
+(provide isTratamientoDiagnostico?)
+(provide getIDDiagnostico_v)
+(provide getIDTratamiento_v)
+(provide extraer_Registros_TratamientoDiagnosticos)
+(provide obtener_IDTratamientos_Segun_IDDiagnostico)
+(provide obtener_IDTratamientos)
+
+(define BDTratamientoDiagnosticos (csv->list (open-input-file "../Base_de_Datos/TratamientoDiagnostico.txt")))
+
+;CONSTRUCTOR:
+(define (createTratamientoDiagnostico IDDiagnostico IDTratamiento)
+        (if (and 
+             (number? IDDiagnostico) 
+             (> IDDiagnostico -1) 
+             (number? IDTratamiento) 
+             (> IDTratamiento -1)       
+             )
+            
+            (list IDDiagnostico IDTratamiento)
+            
+            null
+            
+        )
+  )
+
+;FUNCIÓN DE PERTENENCIA:
+(define (isTratamientoDiagnostico? tratamientoDiagnostico)
+  (if (list? tratamientoDiagnostico)
+      (if (= (length tratamientoDiagnostico) 2)
+          ;Si cumple
+          (if (and
+               (number? (car tratamientoDiagnostico))
+	       (> (car tratamientoDiagnostico) -1)
+               (number? (cadr tratamientoDiagnostico))
+               (> (cadr tratamientoDiagnostico) -1)
+              )
+              
+              #t
+              
+              #f
+              
+              ); fin de la sentecia if n°3.
+          
+          #f
+          
+          ); fin de la sentencia if n°2.
+      
+      #f
+      
+      ); fin de la sentencia if n°1.
+ )
+
+;SELECTORES:
+(define (getIDDiagnostico_v tratamientoDiagnostico)
+  (if (isTratamientoDiagnostico? tratamientoDiagnostico)
+      (car tratamientoDiagnostico)
+      -1
+      )
+  )
+
+(define (getIDTratamiento_v tratamientoDiagnostico)
+  (if (isTratamientoDiagnostico? tratamientoDiagnostico)
+      (cadr tratamientoDiagnostico)
+      -1
+      )
+  )
+
+;FUNCIONES:
+
+#|
+    Función extraer_Registros_TratamientoDiagnosticos
+
+    Descripción: 
+      Función utilizada para retornar una lista de tratamientoDiagnosticos construidos a partir de los registros contenidos en la base de datos TratamientoDiagnostico.txt
+    
+    INPUT: 
+      Lista de registros contenidos en la base de datos TratamientoDiagnostico.txt
+
+    OUTPUT:
+      Lista de TratamientoDiagnosticos
+|#
+(define extraer_Registros_TratamientoDiagnosticos
+  (lambda (registros)
+    (if (= (length registros) (+ (ctdadRegistros BDTratamientoDiagnosticos) 1))
+        
+        #|
+        Sentencia IF N°1:
+        En el caso de que se este leyendo la primera linea de los registros obtenidos a partir de la base de datos
+        -> Si cumple: Se ignora el primer registro, el cual solamente contiene una referencia
+        -> Si no cumple: Se construye un tratamientoDiagnostico a partir del registro considerado, revisando primero si el registro corresponde a un tratamientoDiagnostico
+        |#
+       
+        (extraer_Registros_TratamientoDiagnosticos (cdr registros))
+        
+        (if (= (length registros) 1)
+            
+            #|
+                Sentencia IF N°2:
+                Si se esta considerando el ultimo registro de la base de datos
+                -> Si cumple: Se construye el tratamientoDiagnostico del ultimo registro
+                -> Si no cumple: Se construye el tratamientoDiagnostico del registro correspondiente y se intenta pasar al siguiente
+                |#
+            
+            (list (createTratamientoDiagnostico    
+                   (string->number (car (car registros)))
+                   (string->number (cadr (car registros)))
+                   )
+                  )
+            
+            (cons (createTratamientoDiagnostico    
+                   (string->number (car (car registros)))
+                   (string->number (cadr (car registros)))
+                   )
+                  
+                  (extraer_Registros_TratamientoDiagnosticos (cdr registros))
+                  )
+            
+            );Fin de la sentencia condicional IF N°2
+        );Fin de la sentencia condificonal IF N°1
+    );Fin de lambda
+  );Fin de define
+
+#|
+    Función obtener_IDTratamientos
+
+    Descripción: 
+      Función utilizada para retornar una lista de todos los identificadores tratamientos contenidos en los registros
+    
+    INPUT: 
+      Lista de registros tratamientoDiagnosticos
+
+    OUTPUT:
+      Lista de identificadores Tratamiento
+|#
+(define obtener_IDTratamientos
+  (lambda (registros)
+    (if (= (length registros) 1)
+        
+        ;En el caso en el que se trabaje con el ultimo de los registros
+        (list (getIDTratamiento_v (car registros)))
+        
+        ;En el caso en el que se trabaje con cualquier otro registro
+        (cons (getIDTratamiento_v (car registros)) (obtener_IDTratamientos (cdr registros)))
+        
+        )
+    )
+  )
+
+
+#|
+    Función obtener_IDTratamientos_Segun_IDDiagnostico
+
+    Descripción: 
+      Función utilizada para retornar una lista de identificadores tratamientos relacionados con cierto identificador diagnostico,
+    
+    INPUT: 
+      Identificador Diagnostico
+      Lista de registros tratamientoDiagnosticos
+
+    OUTPUT:
+      Lista de Tratamientos relacionados con el identificador Diagnostico ingresado
+|#
+(define obtener_IDTratamientos_Segun_IDDiagnostico
+  (lambda (IDDiagnostico registros)
+    
+    (if (= (length registros) 1)
+        
+       ;En el caso de que se este considerando el ultimo registro de la lista ingresada:
+        (if (= (getIDDiagnostico_v (car registros)) IDDiagnostico)
+            
+            ;En el caso de que el registro considerado contenga al Identificador Diagnostico ingresado
+             (list (getIDTratamiento_v (car registros)))
+            
+            ;En el caso de no lo hagan
+            null
+            
+            )
+             
+       ;En el caso de que no se este considerando el ultimo registro
+        (if (= (getIDDiagnostico_v (car registros)) IDDiagnostico)
+            
+            ;En el caso de que el registro considerado coincida con el registro a modificar
+            (cons (getIDTratamiento_v (car registros)) (obtener_IDTratamientos_Segun_IDDiagnostico IDDiagnostico(cdr registros)))
+            
+            ;En el caso de que ambos registros no coindican, se pasa a trabajar en el siguiente registro
+            (obtener_IDTratamientos_Segun_IDDiagnostico IDDiagnostico(cdr registros))
+           )
+        )
+    )
+  )
+
+
+
+
+
+#|
+(extraer_Registros_TratamientoDiagnosticos BDTratamientoDiagnosticos)
+(car (extraer_Registros_TratamientoDiagnosticos BDTratamientoDiagnosticos))
+(getIDDiagnostico_v (car (extraer_Registros_TratamientoDiagnosticos BDTratamientoDiagnosticos)))
+(getIDTratamiento_v (car (extraer_Registros_TratamientoDiagnosticos BDTratamientoDiagnosticos)))
+(obtener_IDTratamientos_Segun_IDDiagnostico 93 (extraer_Registros_TratamientoDiagnosticos BDTratamientoDiagnosticos))
+(car (obtener_IDTratamientos_Segun_IDDiagnostico 93 (extraer_Registros_TratamientoDiagnosticos BDTratamientoDiagnosticos)))
+(caddddddr (obtener_IDTratamientos_Segun_IDDiagnostico 93 (extraer_Registros_TratamientoDiagnosticos BDTratamientoDiagnosticos)))
+(obtener_IDTratamientos (extraer_Registros_TratamientoDiagnosticos BDTratamientoDiagnosticos))
+(obtener_IDTratamientos_Segun_IDDiagnostico 42 (extraer_Registros_TratamientoDiagnosticos BDTratamientoDiagnosticos))
+|#
+
+
+
+
+

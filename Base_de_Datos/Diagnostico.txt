@@ -1,0 +1,100 @@
+identificador,descripcionDiagnostico,nivelGravedad
+1,diagnostico1,alto
+2,diagnostico2,bajo
+3,diagnostico3,medio
+4,diagnostico4,nulo
+5,diagnostico5,muy alto
+6,diagnostico6,bajo
+7,diagnostico7,muy alto
+8,diagnostico8,alto
+9,diagnostico9,medio
+10,diagnostico10,nulo
+11,diagnostico11,alto
+12,diagnostico12,bajo
+13,diagnostico13,medio
+14,diagnostico14,nulo
+15,diagnostico15,muy alto
+16,diagnostico16,bajo
+17,diagnostico17,muy alto
+18,diagnostico18,alto
+19,diagnostico19,medio
+20,diagnostico20,nulo
+21,diagnostico21,alto
+22,diagnostico22,bajo
+23,diagnostico23,medio
+24,diagnostico24,nulo
+25,diagnostico25,muy alto
+26,diagnostico26,bajo
+27,diagnostico27,muy alto
+28,diagnostico28,alto
+29,diagnostico29,medio
+30,diagnostico30,nulo
+31,diagnostico31,alto
+32,diagnostico32,bajo
+33,diagnostico33,medio
+34,diagnostico34,nulo
+35,diagnostico35,muy alto
+36,diagnostico36,bajo
+37,diagnostico37,muy alto
+38,diagnostico38,alto
+39,diagnostico39,medio
+40,diagnostico40,nulo
+41,diagnostico41,alto
+42,diagnostico42,bajo
+43,diagnostico43,medio
+44,diagnostico44,nulo
+45,diagnostico45,muy alto
+46,diagnostico46,bajo
+47,diagnostico47,muy alto
+48,diagnostico48,alto
+49,diagnostico49,medio
+50,diagnostico50,nulo
+51,diagnostico51,alto
+52,diagnostico52,bajo
+53,diagnostico53,medio
+54,diagnostico54,nulo
+55,diagnostico55,muy alto
+56,diagnostico56,bajo
+57,diagnostico57,muy alto
+58,diagnostico58,alto
+59,diagnostico59,medio
+60,diagnostico60,nulo
+61,diagnostico61,alto
+62,diagnostico62,bajo
+63,diagnostico63,medio
+64,diagnostico64,nulo
+65,diagnostico65,muy alto
+66,diagnostico66,bajo
+67,diagnostico67,muy alto
+68,diagnostico68,alto
+69,diagnostico69,medio
+70,diagnostico70,nulo
+71,diagnostico71,alto
+72,diagnostico72,bajo
+73,diagnostico73,medio
+74,diagnostico74,nulo
+75,diagnostico75,muy alto
+76,diagnostico76,bajo
+77,diagnostico77,muy alto
+78,diagnostico78,alto
+79,diagnostico79,medio
+80,diagnostico80,nulo
+81,diagnostico81,alto
+82,diagnostico82,bajo
+83,diagnostico83,medio
+84,diagnostico84,nulo
+85,diagnostico85,muy alto
+86,diagnostico86,bajo
+87,diagnostico87,muy alto
+88,diagnostico88,alto
+89,diagnostico89,medio
+90,diagnostico90,nulo
+91,diagnostico91,alto
+92,diagnostico92,bajo
+93,diagnostico93,medio
+94,diagnostico94,nulo
+95,diagnostico95,muy alto
+96,diagnostico96,bajo
+97,diagnostico97,muy alto
+98,diagnostico98,alto
+99,diagnostico99,medio

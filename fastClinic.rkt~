@@ -1,0 +1,492 @@
+#lang racket
+
+(require "FuncionesGenerales.rkt")
+(require "Diagnostico.rkt")
+(require "Doctor.rkt")
+(require "DiagnosticoPaciente.rkt")
+(require "Paciente.rkt")
+(require "Tratamiento.rkt")
+(require "TratamientoDiagnostico.rkt")
+(require "TratamientoDiagnosticoPaciente.rkt")
+
+;FUNCIONES DE SELECCIÓN
+
+;A. (NIVEL BAJO) Obtener el nombre de un paciente dado su rut. 
+(define obtenerNombrePaciente
+  (lambda (rut)
+    
+    #| CONDICIONES:
+    1) El rut ingresado debe ser un string
+    2) Debe poderse obtener una lista de registros a partir de la base de datos
+    3) El rut ingresado debe existir en la base de datos 
+    |#
+    
+    (if (not (string? rut))
+        
+        "El rut debe ser ingresado como una cadena de caracteres delimitada por comillas\n"
+     
+        (if (equal? (extraer_Registros_Pacientes BDPacientes) null)
+            
+            "Se ha producido un error al momento de extraer los registros desde la base de datos\n"
+            
+           (if (equal? (obtener_Registro_Paciente_segun_RUT rut (extraer_Registros_Pacientes BDPacientes)) null)
+               
+               "El rut ingresado no pudo ser encontrado en los registros obtenidos a partir de la base de datos\n"
+               
+               ;Todas las condiciones se cumplieron
+               (string-append (getNombrePaciente (obtener_Registro_Paciente_segun_RUT rut (extraer_Registros_Pacientes BDPacientes))) "\n")
+               )
+           )
+        )
+    )
+  )
+
+;B. (NIVEL BAJO) Obtener la especialidad de un médico a partir de su rut. 
+(define especialidad
+  (lambda (rut)
+    
+    #| CONDICIONES:
+    1) El rut ingresado debe ser un string
+    2) Debe poderse obtener una lista de registros a partir de la base de datos
+    3) El rut ingresado debe existir en la base de datos 
+    |#
+    
+    (if (not(string? rut))
+        
+        "El rut debe ser ingresado como una cadena de caracteres delimitada por comillas\n"
+        
+        (if (equal? (extraer_Registros_Doctores BDDoctores) null)
+            
+            "Se ha producido un error al momento de extraer los registros desde la base de datos\n"
+            
+            (if (equal? (obtener_Registro_Doctor_segun_RUT rut (extraer_Registros_Doctores BDDoctores)) null)
+                
+                 "El rut ingresado no pudo ser encontrado en los registros obtenidos a partir de la base de datos\n"
+                 
+                 (string-append (getEspecialidadDoctor (obtener_Registro_Doctor_segun_RUT rut (extraer_Registros_Doctores BDDoctores))) "\n")
+                 
+                 )
+            )
+        )
+    )
+  )
+
+;C. (NIVEL BAJO) Listar el (o los) tratamiento(s) de acuerdo a un nivel de riesgo dado, deben mostrarse en el mismo orden en que aparecen en la tabla “Tratamiento”.
+(define tratamientoRiesgoso
+  (lambda (nivel)
+
+    #| CONDICIONES:
+    1) El nivel ingresado debe ser un string
+    2) Debe poderse obtener una lista de registros a partir de la base de datos
+    3) El nivel ingresado debe existir en la base de datos 
+    |#
+    (if (not (string? nivel))
+        
+        "El nivel de riesgo debe ser ingresado como una cadena de caracteres delimitada por comillas\n"
+        
+        (if (equal? (extraer_Registros_Tratamientos BDTratamientos) null)
+            
+            "Se ha producido un error al momento de extraer los registros desde la base de datos\n"
+            
+            (if (equal? (obtener_Registros_Tratamientos_Segun_Nivel nivel (extraer_Registros_Tratamientos BDTratamientos)) null)
+                
+                "No se ha podido encontrar el nivel de riesgo ingresado en la base de datos\n"
+                
+                (obtener_Nombres_Tratamientos_Segun_Lista (obtener_Registros_Tratamientos_Segun_Nivel nivel (extraer_Registros_Tratamientos BDTratamientos)))
+    
+                )
+            )
+        )
+    )
+  )
+
+#|
+H. (NIVEL MEDIO) Determinar el (o los) tratamiento(s) más usado(s) para un diagnóstico particular indicando la cantidad de veces que se ha empleado, deben mostrarse en el mismo  
+   orden que la tabla “Tratamiento”. 
+|#
+(define tratamientoMasUsadoPorDiagnostico
+  (lambda (IDDiagnostico)
+    
+    #| CONDICIONES:
+    1) El identificador ingresado debe ser un number
+    2) Debe poderse obtener una lista de registros a partir de la base de datos
+    3) El identificador ingresado debe existir en la base de datos 
+    |#
+    
+    (if (not(and (number? IDDiagnostico) (> IDDiagnostico -1)))
+        
+        "El identificador debe ser ingresado como un numero mayor o igual que cero\n"
+        
+        (if (equal? (extraer_Registros_TratamientoDiagnosticos BDTratamientoDiagnosticos) null)
+            
+            "Se ha producido un error al momento de extraer los registros desde la base de datos\n"
+            
+            (if (equal? (obtener_IDTratamientos_Segun_IDDiagnostico IDDiagnostico (extraer_Registros_TratamientoDiagnosticos BDTratamientoDiagnosticos)) null)
+                
+                "No ha sido posible encontrar el identificador del diagnostico ingresado en la base de datos\n"
+                
+                (let 
+                    ( 
+                     
+                     ;Declaracion de una constante
+                     (contadores
+                      
+                      ;Procedimiento relacionado con la definicion de la constante "contadores"
+                      (map 
+                       (lambda (L) (cadr L))
+                       (reverse (listar_Y_Contar_Elementos_En_Listas_V1 (obtener_IDTratamientos_Segun_IDDiagnostico IDDiagnostico (extraer_Registros_TratamientoDiagnosticos BDTratamientoDiagnosticos)) null))
+                       )
+                      )
+                     
+                     );Fin de la declaracion de constantes
+                  
+                  ;Se busca a los identificadores más utilizados, es decir, aquellos con un contador más alto
+                  (let
+                      (
+                       
+                       ;Declaración de una constante
+                       (maximosIdentificadores
+                        
+                        ;Procedimiento relacionado con la definición de la constante "maximosIdentificadores"
+                        (map
+                         (lambda (L) (car L))
+                         (obtener_Maximos_Elementos_Lista_Contada (reverse (listar_Y_Contar_Elementos_En_Listas_V1 (obtener_IDTratamientos_Segun_IDDiagnostico IDDiagnostico (extraer_Registros_TratamientoDiagnosticos BDTratamientoDiagnosticos)) null)) (obtener_Maximo_Lista contadores 0))
+                         )
+                        )
+                       )
+                              
+                    (concatenar_Listas_De_Texto
+                     (map (lambda (L) (string-append (car L) " " (number->string (cadr L)) "\n" )) 
+                          (map (lambda (L2) (list L2 (obtener_Maximo_Lista contadores 0)))
+                          (obtener_Nombres_Tratamientos_Segun_Identificadores (sort maximosIdentificadores <) (extraer_Registros_Tratamientos BDTratamientos))
+                          )
+                          )
+                     )
+                   ) ;Fin de let 2
+                  ); Fin de let 1
+                )
+            )
+        )
+    )
+  )
+   
+#|
+I. (NIVEL MEDIO) Identificar el (o los) médico(s) que más altas otorga indicando su rut, nombre y apellido, y la cantidad de altas, el rut debe separarse mediante una
+   coma del nombre y el apellido, lo mismo debe ocurrir para la cantidad de altas. En caso de haber dos o más médicos con igual cantidad de altas se deben mostrar todos
+   estos ordenados según como aparecen en la tabla “Doctor”. 
+|#
+(define medicoMasAltas 
+  (if (equal? (extraer_Registros_DiagnosticoPacientes BDDiagnosticosPacientes) null)
+      
+      "Se ha producido un error al momento de extraer los registros desde la base de datos\n"
+      
+      (let
+          (           
+           ;Declaracion de una constante
+           (contadores
+            (map (lambda (L) (cadr L))
+                 (reverse (listar_Y_Contar_Elementos_En_Listas_V1 (obtener_Identificadores_Doctor_Alta (extraer_Registros_DiagnosticoPacientes BDDiagnosticosPacientes)) null))
+                 )
+            )
+           )
+            
+        ;Procedimiento relacionado con la declaracion de la constante "contadores"
+        (let
+            (
+             ;Declaracion de una constante
+             (maximosIdentificadores
+              (map 
+               (lambda (L) (car L))
+                (obtener_Maximos_Elementos_Lista_Contada  (reverse (listar_Y_Contar_Elementos_En_Listas_V1 (obtener_Identificadores_Doctor_Alta (extraer_Registros_DiagnosticoPacientes BDDiagnosticosPacientes)) null)) (obtener_Maximo_Lista contadores 0))
+                )
+              )
+             )
+          
+          ;Procedimiento relacionado con la declaracion de la constante "maximosIdentificadores"
+          
+           (concatenar_Listas_De_Texto 
+            (map
+             (lambda (L) (string-append L "," (number->string (obtener_Maximo_Lista contadores 0)) "\n"))
+             (obtener_RUT_Nombre_Apellido_Doctores_segun_Identificadores (sort maximosIdentificadores <) (extraer_Registros_Doctores BDDoctores))
+             )
+            )
+           
+          )
+        )
+      )
+  )
+
+#|
+J. (NIVEL MEDIO)  Identificar el (o los) tratamiento(s) más usado(s) en todo el sistema indicando la cantidad de veces que se ha(n) usado, En caso de haber
+   dos o más tratamientos con igual cantidad de veces que han sido usados, se deben mostrar todos estos ordenados según como aparecen en la tabla “Tratamiento”.
+|#
+(define tratamientoMasUsado
+  
+  (if (equal? (extraer_Registros_TratamientoDiagnosticos BDTratamientoDiagnosticos) null)
+      
+      "Se ha producido un error al momento de extraer los registros desde la base de datos\n"
+      
+      (if (equal? (obtener_IDTratamientos (extraer_Registros_TratamientoDiagnosticos BDTratamientoDiagnosticos)) null)
+          
+          "Se ha producido un error al momento de extraer los identificadores de los diferentes tratamientos \n"
+          
+          (let
+              (
+               ;Declaracion de una constante
+               (contadores
+                (map (lambda (L) (cadr L))
+                     (reverse (listar_Y_Contar_Elementos_En_Listas_V1 (obtener_IDTratamientos (extraer_Registros_TratamientoDiagnosticos BDTratamientoDiagnosticos)) null))
+                     )
+                )
+               )
+               
+            ;Procedimiento relacionado con la declaración de la constante "contadores"
+            (let
+                (
+                 ;Declaracion de una constante
+                 (identificadoresTratamientosMasUsados
+                  (map 
+                   (lambda (L) (car L))
+                   (obtener_Maximos_Elementos_Lista_Contada  (reverse (listar_Y_Contar_Elementos_En_Listas_V1 (obtener_IDTratamientos (extraer_Registros_TratamientoDiagnosticos BDTratamientoDiagnosticos)) null)) (obtener_Maximo_Lista contadores 0))
+                   )
+                  )
+                 )
+              
+              ;Procedimiento relacionado con la declaración de la constante "identificadoresTratamientosMasUsados"
+              (concatenar_Listas_De_Texto
+               (map (lambda (L) (string-append L "," (number->string (obtener_Maximo_Lista contadores 0)) "\n"))
+                    (obtener_Nombres_Tratamientos_Segun_Identificadores (sort identificadoresTratamientosMasUsados <) (extraer_Registros_Tratamientos BDTratamientos))
+                    )
+               )
+              )
+            )
+          )
+      )
+  )
+      
+#|O. (Nivel Alto) Dado el nombre y apellido de una persona, indicar cuál es el nivel de riesgo del último tratamiento recibido.  |#
+(define riesgoUltimoTratamiento 
+  (lambda (nombre apellido)
+    
+    [if (not(string? nombre))
+        
+        "El nombre debe ser ingresado como una cadena de texto delimitada por comillas\n"
+        
+        [if (not (string? apellido))
+            
+            "El apellido debe ser ingresado como una cadena de texto delimitada por comillas\n"
+            
+            [if (or (equal? (extraer_Registros_Pacientes BDPacientes) null ) 
+                    (equal? (extraer_Registros_DiagnosticoPacientes BDDiagnosticosPacientes) null) 
+                    (equal? (extraer_Registros_TratamientoDiagnosticoPacientes BDTratamientoDiagnosticoPacientes) null)
+                    (equal? (extraer_Registros_Tratamientos BDTratamientos) null)
+                    )
+                
+                
+                "Se ha producido un error al momento de extraer los registros desde la base de datos\n"
+                
+                [if (= (getIDPaciente (obtener_Registro_Paciente_segun_Nombre_Apellido nombre apellido (extraer_Registros_Pacientes BDPacientes))) -1)
+                    
+                    "No se ha podido encontrar el nombre y el apellido del paciente en la base de datos\n"
+                    
+                    ;1) Se obtiene el registro de un paciente segun su nombre y apellido
+                    ;2) Se obtiene el identificador del registro del paciente y se declara como una constante
+                    (let
+                        (
+                         (IDPaciente (getIDPaciente (obtener_Registro_Paciente_segun_Nombre_Apellido nombre apellido (extraer_Registros_Pacientes BDPacientes))))
+                         )
+                      
+                      ;3) Se obtienen los registros DiagnosticoPaciente relacionados con el identificador del paciente
+                      ;4) Se obtienen los identificadores DiagnosticoPaciente relacionado con los registros obtenidos y se declara como una constante
+                      (
+                       let
+                          (
+                           (IDDiagnosticoPacientes 
+                            (map getIDDiagnosticoPaciente_vvv 
+                                 (obtener_Registros_DiagnosticoPaciente_Segun_IDPaciente IDPaciente (extraer_Registros_DiagnosticoPacientes BDDiagnosticosPacientes))
+                                 )
+                            )
+                           )
+                        
+                        ;5) Se obtienen los registros Tratamientos relacionados con los identificadores DiagnosticoPaciente
+                        (let 
+                            (
+                             (RegistrosTratamientos
+                              (map (lambda (ID) (obtener_Registro_TratamientoDiagnosticoPaciente_segun_IDDiagnosticoPaciente ID (extraer_Registros_TratamientoDiagnosticoPacientes BDTratamientoDiagnosticoPacientes))) 
+                                   IDDiagnosticoPacientes
+                                   )
+                              )
+                             )
+                          
+                          ;6) Se obtienen las fechas relacionadas con los registros Tratamientos
+                          (let
+                              (
+                               (fechasTratamientos
+                                (map (lambda (registro) (getFechaInicio registro)) RegistrosTratamientos)
+                                )
+                               )
+                            
+                            ;7) Se obtiene la fecha mas reciente
+                            (
+                             let
+                                (
+                                 (fechaMasReciente (encontrar_Fecha_Mas_Reciente fechasTratamientos (car fechasTratamientos)))
+                                 )
+                              
+                              ;8) Se obtiene el identificador del tratamiento mas reciente
+                              (
+                               let
+                                  (
+                                   (IDTratamientoReciente 
+                                    (getIDTratamiento_vv (obtener_Registro_TratamientoDiagnosticoPaciente_segun_Fecha fechaMasReciente (extraer_Registros_TratamientoDiagnosticoPacientes BDTratamientoDiagnosticoPacientes)))
+                                    )
+                                   )
+                                ;9) Se obtiene el registro relacionado con el identificador del tratamiento y luego su nivel de riesgo
+                                (string-append (getNivelDeRiesgo (obtener_Registro_Tratamiento_Segun_Identificador IDTratamientoReciente (extraer_Registros_Tratamientos BDTratamientos))) "\n")
+                                )
+                              )
+                            )
+                          )
+                        ) 
+                      )
+                    ]
+                ]
+            ]
+        ]
+    )
+  )
+        
+
+
+#| Y. (Nivel Alto) Dado el correo del paciente y del médico, modificar el médico que da el alta en su última ocasión. |#
+(define modificarMedicoAlta
+  (lambda (emailPaciente emailMedico)
+    
+    [if (not (string? emailPaciente))
+        
+        "El correo del paciente debe ser ingresado como un string delimitado por comillas\n"
+        
+        [if (not (string? emailMedico))
+            
+            "El correo del medico debe ser ingresado como un string delimitado por comillas\n"
+            
+            [if (or
+                 (equal? (extraer_Registros_DiagnosticoPacientes BDDiagnosticosPacientes) null)
+                 (equal? (extraer_Registros_Pacientes BDPacientes) null)
+                 (equal? (extraer_Registros_Doctores BDDoctores) null)
+                 )
+                
+                "Se ha producido un error al extraer los registros desde la base de datos\n"
+               
+                (let 
+                    (
+                     (registroPaciente (obtener_Registro_Paciente_segun_Email emailPaciente (extraer_Registros_Pacientes BDPacientes)))
+                     (registroDoctor (obtener_Registro_Doctor_segun_Email emailMedico (extraer_Registros_Doctores BDDoctores)))
+                     )
+                  
+                  [if (equal? registroPaciente null)
+
+                      "No se ha podido encontrar el email del paciente en la base de datos\n"
+                   
+                      [if (equal? registroDoctor null)
+                       
+                          "No se ha podido encontrar el email del doctor en la base de datos\n"
+                       
+                          (let
+                              (
+                               (IDPaciente (getIDPaciente registroPaciente))
+                               (IDDoctor (getIDDoctor registroDoctor))
+                               )
+                            
+                            (let
+                                (
+                                 (registrosDiagnosticoPaciente (obtener_Registros_DiagnosticoPaciente_Segun_IDPaciente IDPaciente (extraer_Registros_DiagnosticoPacientes BDDiagnosticosPacientes)))
+                                 )
+                              
+                              [if (equal? registrosDiagnosticoPaciente null)
+                                  
+                                  "No se ha podido encontrar el paciente dentro de los registros de vinculación Diagnostico - Paciente \n"
+                                  
+                                  (
+                                   let
+                                      (
+                                       (fechasAlta (map (lambda (L) (getFechaAlta L)) registrosDiagnosticoPaciente))
+                                       )
+                                    
+                                     (
+                                      let
+                                         (
+                                          (fechaAltaMasReciente (encontrar_Fecha_Mas_Reciente fechasAlta (car fechasAlta)))
+                                          )
+                                       
+                                       (let
+                                           (
+                                            (registroDiagnosticoPacienteParaModificar (obtener_Registros_DiagnosticoPaciente_Segun_FechaAlta fechaAltaMasReciente registrosDiagnosticoPaciente))
+                                            )
+                                         
+                                         ;Suponiendo que hay más de un registro con la fecha de alta más reciente
+                                         (display (concatenar_Listas_De_Texto
+                                                   (map (lambda (reg)
+                                                          (string-append (number->string(getIDDiagnosticoPaciente_vvv reg)) ","
+                                                                         (number->string(getIDPaciente_vvv reg)) ","
+                                                                         (number->string(getIDDiagnostico_vvv reg)) ","
+                                                                         (getFechaDiagnostico reg) ","
+                                                                         (number->string(getIDDoctorDiagnostico reg)) ","
+                                                                         (getEstadoDiagnostico reg) ","
+                                                                         (getFechaAlta reg) ","
+                                                                         (number->string(getIDDoctorAlta reg)) ","
+                                                                         (getDetalleAlta reg) "\n"
+                                                                         )
+                                                          )                 
+                                                        (modificar_IDDoctorAlta_Registro_DiagnosticoPaciente_Segun_Registro IDDoctor registroDiagnosticoPacienteParaModificar (extraer_Registros_DiagnosticoPacientes BDDiagnosticosPacientes))
+                                                        )
+                                                   )
+                                                  )
+                                         )
+                                       )   
+                                    )
+                                  ]
+                              )
+                            )
+                          ]
+                      ]
+                  ) 
+               ]
+            ]
+        ]
+    )
+  )
+
+(modificarMedicoAlta "correo68@paciente.com" "correo59@doctor.com")
+
+
+#|
+(obtenerNombrePaciente 6666666666)
+(obtenerNombrePaciente "rut invalido")
+(obtenerNombrePaciente "rutPaciente66")
+
+(especialidad 666666666666)
+(especialidad "rut invalido")
+(especialidad "rutdoctor66")
+
+(tratamientoRiesgoso 666666666)
+(tratamientoRiesgoso "nivel invalido")
+(tratamientoRiesgoso "alto")
+
+(tratamientoMasUsadoPorDiagnostico -1)
+(tratamientoMasUsadoPorDiagnostico "hyehee")
+(tratamientoMasUsadoPorDiagnostico 100)
+
+medicoMasAltas
+
+tratamientoMasUsado
+(display tratamientoMasUsado)
+
+(riesgoUltimoTratamiento 22 "apellido")
+(riesgoUltimoTratamiento "nombre" 22)
+(riesgoUltimoTratamiento "nombre" "apellido")
+(riesgoUltimoTratamiento "nombrePaciente23" "apellidoPaciente23")
+
+
+|#
+

@@ -1,0 +1,393 @@
+#lang racket
+
+(require "FuncionesGenerales.rkt")
+(require (planet neil/csv:2:0))
+
+(provide BDDoctores)
+(provide createDoctor)
+(provide isDoctor?)
+(provide getIDDoctor)
+(provide getRUTDoctor)
+(provide getEmailDoctor)
+(provide getNombreDoctor)
+(provide getApellidoDoctor)
+(provide getEspecialidadDoctor)
+(provide extraer_Registros_Doctores)
+(provide obtener_ID_Doctor_segun_RUT)
+(provide obtener_Registro_Doctor_segun_RUT)
+(provide obtener_Registro_Doctor_segun_Email)
+(provide obtener_RUT_Nombre_Apellido_Doctor_segun_Identificador)
+(provide obtener_RUT_Nombre_Apellido_Doctor_segun_Identificador_V2)
+(provide obtener_RUT_Nombre_Apellido_Doctores_segun_Identificadores)
+
+
+
+(define BDDoctores (csv->list (open-input-file "Base_de_Datos/Doctor.txt")))
+
+
+;CONSTRUCTOR:
+(define (createDoctor IDDoctor rut email nombre apellido especialidad)
+        (if (and 
+            (number? IDDoctor) 
+            (> IDDoctor -1)       
+            (string? rut)
+            (string? email)
+            (string? nombre)
+            (string? apellido)
+            (string? especialidad)
+            )
+            
+            (list IDDoctor rut email nombre apellido especialidad)
+            
+            null
+            
+        )
+ )
+
+;FUNCIÓN DE PERTENENCIA:
+(define (isDoctor? doctor)
+  (if (list? doctor)
+      (if (= (length doctor) 6)
+          ;Si cumple
+          (if (and
+               (number? (car doctor))
+	       (> (car doctor) -1) 
+               (string? (cadr doctor))
+               (string? (caddr doctor))
+               (string? (cadddr doctor))
+               (string? (caddddr doctor))
+               (string? (cadddddr doctor))
+              )
+              
+              #t
+              
+              #f
+              
+              ); FIN DE LA SENTENCIA IF N°3
+          
+          #f
+          
+          ); FIN DE LA SENTENCIA IF N°2
+      
+      #f
+      
+      ); FIN DE LA SENTENCIA IF N°1
+ )
+
+;SELECTORES:
+(define (getIDDoctor doctor)
+  (if (isDoctor? doctor)
+      (car doctor)
+      -1
+  )
+)
+
+(define (getRUTDoctor doctor)
+  (if (isDoctor? doctor)
+      (cadr doctor)
+      -1
+  )
+)
+
+(define (getEmailDoctor doctor)
+  (if (isDoctor? doctor)
+      (caddr doctor)
+      -1
+  )
+)
+
+(define (getNombreDoctor doctor)
+    (if (isDoctor? doctor)
+      (cadddr doctor)
+      -1
+  )
+)
+
+(define (getApellidoDoctor doctor)
+  (if (isDoctor? doctor)
+      (caddddr doctor)
+      -1
+  )
+)
+
+(define (getEspecialidadDoctor doctor)
+    (if (isDoctor? doctor)
+      (cadddddr doctor)
+      -1
+  )
+)
+
+;    Funciones
+
+#|
+    Función extraer_Registros_Doctores
+
+    Descripción: 
+      Función utilizada para retornar una lista de doctores construidos a partir de los registros contenidos en la base de datos Doctor.txt. Se basa en el uso de una
+      aplicación de recursión lineal, no por cola, para poder extraer cada uno de los registros y construir con ellos los diferentes doctores contenidos en la base de datos.
+      Estos son agregados a una lista, a la cual se retorna tras finalizar la ejecución de la función en el caso de que todo salga bien. Por otro lado, si algún error ocurre
+      durante el proceso, se devuelve una lista vacia (null). 
+    
+    INPUT: 
+      Lista de registros contenidos en la base de datos Doctor.txt
+
+    OUTPUT:
+      Lista de doctores
+|#
+(define extraer_Registros_Doctores
+  (lambda (registros)
+    (if (= (length registros) (+ (ctdadRegistros BDDoctores) 1))
+        
+        #|
+        Sentencia IF N°1:
+        En el caso de que se este leyendo la primera linea de los registros obtenidos a partir de la base de datos
+        -> Si cumple: Se ignora el primer registro, el cual solamente contiene una referencia
+        -> Si no cumple: Se construye un doctor a partir del registro considerado, revisando primero si el registro corresponde a un doctor
+        |#
+       
+        (extraer_Registros_Doctores (cdr registros))
+        
+        (if (= (length registros) 1)
+            
+            #|
+                Sentencia IF N°2:
+                Si se esta considerando el ultimo registro de la base de datos
+                -> Si cumple: Se construye el doctor del ultimo registro
+                -> Si no cumple: Se construye el doctor del registro correspondiente y se intenta pasar al siguiente
+                |#
+            
+            (list (createDoctor
+             (string->number (car (car registros)))
+             (cadr (car registros))
+             (caddr (car registros))
+             (cadddr (car registros))
+             (caddddr (car registros))
+             (cadddddr (car registros)) 
+             ))
+            
+            (cons (createDoctor    
+                   (string->number (car (car registros)))
+                   (cadr (car registros))
+                   (caddr (car registros))
+                   (cadddr (car registros))
+                   (caddddr (car registros))
+                   (cadddddr (car registros)) 
+                   )
+                  
+                  (extraer_Registros_Doctores (cdr registros))
+                  )
+            
+            );Fin de la sentencia condicional IF N°2
+        );Fin de la sentencia condificonal IF N°1
+    );Fin de lambda
+  );Fin de define
+
+
+#|
+    Función obtener_ID_Doctor_segun_RUT
+
+    Descripción: 
+      Función utilizada para retornar el identificador de un doctor comparando un rut ingresado con el rut de todos los registros de los doctores. Recurre a una recursión del tipo lineal no por cola 
+      para poder analizar registro por registro hasta encontrar el solicitado.
+    
+    INPUT: 
+      Rut del doctor
+      Lista de registros de doctores
+
+    OUTPUT:
+      Identificador del doctor
+|#
+(define obtener_ID_Doctor_segun_RUT
+  
+  (lambda (rut registros)
+    
+    ;En el caso de que se este leyendo la primera linea del archivo
+    
+    (if (= (length registros) (+ (ctdadRegistros BDDoctores) 1))
+        
+        ;Se ignora la primera linea de los registros
+        
+        (obtener_ID_Doctor_segun_RUT rut (cdr registros))
+          
+        ;En el caso de que no se este leyendo la primera linea. Se busca registro por registro hasta encontrar una similitud con respecto al rut    
+        (if (string=? (getRUTDoctor (car registros)) rut)
+            
+            ;En el caso de que se haya encontrado el rut en un registro
+            (getIDDoctor (car registros))
+            
+            ;En el caso de que no se haya encontrado el rut en un registro, se intenta buscar en el siguiente registro (Si es que existe)
+            (if (not (= (length registros) 1) ) 
+                
+                ;En el caso de que exista un siguiente registro.
+                (obtener_ID_Doctor_segun_RUT rut (cdr registros))
+                
+                ;En el caso de que no exista un siguiente registro
+                null
+
+                )
+            )
+        )
+    )
+ )
+
+#|
+    Función obtener_Registro_Doctor_segun_RUT
+
+    Descripción: 
+      Función utilizada para retornar el registro de un doctor comparando un rut ingresado con el rut de todos los registros de los doctores. Recurre a una recursión del tipo lineal no por cola
+      para analizar registro por registro hasta encontrar una coincidencia.
+    
+    INPUT: 
+      Rut del doctor
+      Lista de registros de doctores
+
+    OUTPUT:
+      Registro del doctor
+|#
+(define obtener_Registro_Doctor_segun_RUT
+  
+  (lambda (rut registros)
+        
+    (if (string=? (getRUTDoctor (car registros)) rut)
+        
+        ;En el caso de que se haya encontrado el rut en un registro
+        (car registros)
+        
+        ;En el caso de que no se haya encontrado el rut en un registro, se intenta buscar en el siguiente registro (Si es que existe)
+        (if (not (= (length registros) 1) ) 
+            
+            ;En -el caso de que exista un siguiente registro.
+            (obtener_Registro_Doctor_segun_RUT rut (cdr registros))
+            
+            ;En el caso de que no exista un siguiente registro
+            null
+            
+            )
+        )
+    
+    )
+ )
+
+#|
+    Función obtener_Registro_Doctor_segun_Email
+
+    Descripción: 
+      Función utilizada para retornar el registro de un doctor comparando un email ingresado con el email de todos los registros de los doctores. Recurre a una recursión del tipo lineal no por cola
+      para analizar registro por registro hasta encontrar una coincidencia.
+    
+    INPUT: 
+      Email del doctor
+      Lista de registros de doctores
+
+    OUTPUT:
+      Registro del doctor
+|#
+(define obtener_Registro_Doctor_segun_Email
+  
+  (lambda (email registros)
+    
+    (if (string=? (getEmailDoctor (car registros)) email)
+            
+        ;En el caso de que se haya encontrado el email en un registro
+        (car registros)
+        
+        ;En el caso de que no se haya encontrado el email en un registro, se intenta buscar en el siguiente registro (Si es que existe)
+        (if (not (= (length registros) 1) ) 
+            
+            ;En el caso de que exista un siguiente registro.
+            (obtener_Registro_Doctor_segun_Email email (cdr registros))
+            
+            ;En el caso de que no exista un siguiente registro
+            null
+            
+            )
+        )
+       
+    )
+ )
+#|
+    Función obtener_RUT_Nombre_Apellido_Doctor_segun_Identificador
+
+    Descripción: 
+      Función utilizada para retornar el rut, nombre y apellido de un doctor relacionado con un identificador ingresado como entrada.  Recurre a una recursión del tipo lineal no por cola
+      para analizar registro por registro hasta encontrar una coincidencia con respecto al identificador.
+    
+    INPUT: 
+      Identificador
+      Lista de registros de doctores
+
+    OUTPUT:
+      Rut, nombre y apellido de un doctor como una cadena de caracteres de la forma "rut,nombre apellido"
+|#
+(define obtener_RUT_Nombre_Apellido_Doctor_segun_Identificador
+  (lambda (identificador registros)
+    
+    (if (= (getIDDoctor (car registros)) identificador)
+        
+        ;En el caso de que se haya encontrado el identificador en un registro
+        (string-append (getRUTDoctor (car registros)) "," (getNombreDoctor (car registros)) " " (getApellidoDoctor (car registros)))
+        
+        ;En el caso de que no se haya encontrado el identificador en un registro, se intenta buscar en el siguiente registro (Si es que existe)
+        (if (not (= (length registros) 1) ) 
+            
+            ;En -el caso de que exista un siguiente registro.
+            (obtener_RUT_Nombre_Apellido_Doctor_segun_Identificador identificador (cdr registros))
+            
+            ;En el caso de que no exista un siguiente registro
+            null
+            
+            )
+        )
+    )
+  )
+
+;Lo mismo que el anterior, solo que el rut no esta separado por una coma.
+(define obtener_RUT_Nombre_Apellido_Doctor_segun_Identificador_V2
+  (lambda (identificador registros)
+    
+    (if (= (getIDDoctor (car registros)) identificador)
+        
+        ;En el caso de que se haya encontrado el identificador en un registro
+        (string-append (getRUTDoctor (car registros)) " " (getNombreDoctor (car registros)) " " (getApellidoDoctor (car registros)))
+        
+        ;En el caso de que no se haya encontrado el identificador en un registro, se intenta buscar en el siguiente registro (Si es que existe)
+        (if (not (= (length registros) 1) ) 
+            
+            ;En -el caso de que exista un siguiente registro.
+            (obtener_RUT_Nombre_Apellido_Doctor_segun_Identificador_V2 identificador (cdr registros))
+            
+            ;En el caso de que no exista un siguiente registro
+            null
+            
+            )
+        )
+    )
+  )
+
+ #|
+    Función obtener_RUT_Nombre_Apellido_Doctores_segun_Identificadores
+
+    Descripción: 
+      Función utilizada para retornar el rut, nombre y apellido de los doctores relacionados con ciertos identificadores ingresado como entrada. Recurre a una recursión del tipo lineal no por cola
+      para analizar registro por registro, haciendo uso de la función obtener_RUT_Nombre_Apellido_Doctor_segun_Identificador
+    
+    INPUT: 
+      Lista de identificadores
+      Lista de registros de doctores
+
+    OUTPUT:
+      Lista con el Rut, nombre y apellido de cada doctor, escrito cada uno como una cadena de caracteres de la forma "rut,nombre apellido"
+|#
+(define obtener_RUT_Nombre_Apellido_Doctores_segun_Identificadores
+  (lambda (identificadores registros)
+    
+    (if (= (length identificadores) 1)
+        
+        ;En el caso en que se este trabajando sobre el ultimo identificador 
+        (list (obtener_RUT_Nombre_Apellido_Doctor_segun_Identificador (car identificadores) registros))
+        
+        ;En el caso en que se este trabajando sobre cualquier otro identificador
+        (cons (obtener_RUT_Nombre_Apellido_Doctor_segun_Identificador (car identificadores) registros) (obtener_RUT_Nombre_Apellido_Doctores_segun_Identificadores (cdr identificadores) registros))
+        )
+    )
+  )

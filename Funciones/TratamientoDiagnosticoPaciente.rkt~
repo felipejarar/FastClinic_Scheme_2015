@@ -1,0 +1,287 @@
+#lang racket
+
+(require "FuncionesGenerales.rkt")
+(require (planet neil/csv:2:0))
+
+(provide BDTratamientoDiagnosticoPacientes)
+(provide createTratamientoDiagnosticoPaciente)
+(provide isTratamientoDiagnosticoPaciente?)
+(provide getIDDiagnosticoPaciente_vv)
+(provide getIDTratamiento_vv)
+(provide getIDMedico_vv)
+(provide getFechaInicio)
+(provide getDuracionDias)
+(provide getResultado)
+(provide extraer_Registros_TratamientoDiagnosticoPacientes)
+(provide obtener_Registro_TratamientoDiagnosticoPaciente_segun_IDDiagnosticoPaciente)
+(provide obtener_Registro_TratamientoDiagnosticoPaciente_segun_Fecha)
+
+(define BDTratamientoDiagnosticoPacientes (csv->list (open-input-file "../Base_de_Datos/TratamientoDiagnosticoPaciente.txt")))
+
+;CONSTRUCTOR:
+(define (createTratamientoDiagnosticoPaciente IDDiagnosticoPaciente IDTratamiento IDMedico fechaInicio duracionDias resultado)
+        (if (and 
+            (number? IDDiagnosticoPaciente) 
+            (> IDDiagnosticoPaciente -1)
+            (number? IDTratamiento) 
+            (> IDTratamiento -1)       
+            (number? IDMedico) 
+            (> IDMedico -1)       
+            (string? fechaInicio)
+            (number? duracionDias) 
+            (> duracionDias -1)   
+            (string? resultado)
+            )
+            
+            (list IDDiagnosticoPaciente IDTratamiento IDMedico fechaInicio duracionDias resultado)
+            
+            null
+            
+        )
+     
+  );FIN CONSTRUCTOR.
+
+;FUNCIÓN DE PERTENENCIA:
+(define (isTratamientoDiagnosticoPaciente? tratamientoDiagnosticoPaciente)
+  (if (list? tratamientoDiagnosticoPaciente)
+      (if (= (length tratamientoDiagnosticoPaciente) 6)
+          ;Si cumple
+          (if (and
+               ;IDDiagnosticoPaciente
+               (number? (car tratamientoDiagnosticoPaciente))
+	       (> (car tratamientoDiagnosticoPaciente) -1)
+               ;IDTratamiento
+               (number? (cadr tratamientoDiagnosticoPaciente))
+	       (> (cadr tratamientoDiagnosticoPaciente) -1)
+               ;IDMedico
+               (number? (caddr tratamientoDiagnosticoPaciente))
+	       (> (caddr tratamientoDiagnosticoPaciente) -1)
+               ;fechaInicio
+               (string? (cadddr tratamientoDiagnosticoPaciente))
+               ;duracionDias
+               (number? (caddddr tratamientoDiagnosticoPaciente))
+	       (> (caddddr tratamientoDiagnosticoPaciente) -1)
+               ;resultado
+               (string? (cadddddr tratamientoDiagnosticoPaciente))
+              )
+              
+              #t
+              
+              #f
+              
+              ); fin de la sentecia if n°3.
+          
+          #f
+          
+          ); fin de la sentencia if n°2.
+      
+      #f
+      
+      ); fin de la sentencia if n°1.
+ )
+
+;SELECTORES:
+(define (getIDDiagnosticoPaciente_vv tratamientoDiagnosticoPaciente)
+  (if (isTratamientoDiagnosticoPaciente? tratamientoDiagnosticoPaciente)
+      (car tratamientoDiagnosticoPaciente)
+      -1
+      )
+  )
+
+(define (getIDTratamiento_vv tratamientoDiagnosticoPaciente)
+  (if (isTratamientoDiagnosticoPaciente? tratamientoDiagnosticoPaciente)
+      (cadr tratamientoDiagnosticoPaciente)
+      -1
+      )
+  )
+
+(define (getIDMedico_vv tratamientoDiagnosticoPaciente)
+  (if (isTratamientoDiagnosticoPaciente? tratamientoDiagnosticoPaciente)
+      (caddr tratamientoDiagnosticoPaciente)
+      -1
+      )
+  )
+
+(define (getFechaInicio tratamientoDiagnosticoPaciente)
+  (if (isTratamientoDiagnosticoPaciente? tratamientoDiagnosticoPaciente)
+      (cadddr tratamientoDiagnosticoPaciente)
+      -1
+      )
+  )
+
+(define (getDuracionDias tratamientoDiagnosticoPaciente)
+  (if (isTratamientoDiagnosticoPaciente? tratamientoDiagnosticoPaciente)
+      (caddddr tratamientoDiagnosticoPaciente)
+      -1
+      )
+  )
+
+
+(define (getResultado tratamientoDiagnosticoPaciente)
+  (if (isTratamientoDiagnosticoPaciente? tratamientoDiagnosticoPaciente)
+      (cadddddr tratamientoDiagnosticoPaciente)
+      -1
+      )
+  )
+
+;FUNCIONES:
+
+#|
+    Función extraer_Registros_TratamientoDiagnosticoPacientes
+
+    Descripción: 
+      Función utilizada para retornar una lista de tratamientoDiagnosticoPacientes construidos a partir de los registros contenidos en la base de datos TratamientoDiagnosticoPaciente.txt
+    
+    INPUT: 
+      Lista de registros contenidos en la base de datos TratamientoDiagnosticoPaciente.txt
+
+    OUTPUT:
+      Lista de tratamientoDiagnosticoPacientes
+|#
+(define extraer_Registros_TratamientoDiagnosticoPacientes
+  (lambda (registros)
+    (if (= (length registros) (+ (ctdadRegistros BDTratamientoDiagnosticoPacientes) 1))
+        
+        #|
+        Sentencia IF N°1:
+        En el caso de que se este leyendo la primera linea de los registros obtenidos a partir de la base de datos
+        -> Si cumple: Se ignora el primer registro, el cual solamente contiene una referencia
+        -> Si no cumple: Se construye un tratamientoDiagnosticoPaciente a partir del registro considerado, revisando primero si el registro corresponde a un tratamientoDiagnosticoPaciente
+        |#
+       
+        (extraer_Registros_TratamientoDiagnosticoPacientes (cdr registros))
+        
+        (if (= (length registros) 1)
+            
+            #|
+                Sentencia IF N°2:
+                Si se esta considerando el ultimo registro de la base de datos
+                -> Si cumple: Se construye el tratamientoDiagnosticoPaciente del ultimo registro
+                -> Si no cumple: Se construye el tratamientoDiagnosticoPaciente del registro correspondiente y se intenta pasar al siguiente
+                |#
+            
+            (list (createTratamientoDiagnosticoPaciente    
+                   (string->number (car (car registros)))
+                   (string->number(cadr (car registros)))
+                   (string->number(caddr (car registros)))
+                   (cadddr (car registros))
+                   (string->number(caddddr (car registros)))
+                   (cadddddr (car registros))
+                   )
+                  )
+            
+            (cons (createTratamientoDiagnosticoPaciente    
+                   (string->number (car (car registros)))
+                   (string->number(cadr (car registros)))
+                   (string->number(caddr (car registros)))
+                   (cadddr (car registros))
+                   (string->number(caddddr (car registros)))
+                   (cadddddr (car registros))
+                   )
+                  
+                  (extraer_Registros_TratamientoDiagnosticoPacientes (cdr registros))
+                  )
+            
+            );Fin de la sentencia condicional IF N°2
+        );Fin de la sentencia condificonal IF N°1
+    );Fin de lambda
+  );Fin de define
+
+#|
+   Función obtener_Registro_TratamientoDiagnosticoPaciente_segun_IDDiagnosticoPaciente
+
+   Descripción: Función utilizada para obtener el registro TratamientoDiagnosticoPaciente relacionado
+   con el identificador DiagnosticoPaciente entregado como parametro, recurriendo a una recursión para
+   comparar registro por registro hasta encontrar una similitud
+
+   INPUT:
+    IDDiagnosticoPaciente
+    Registros TratamientoDiagnosticoPaciente
+
+   OUTPUT:
+    Registro TratamientoDiagnosticoPaciente
+|#
+(define obtener_Registro_TratamientoDiagnosticoPaciente_segun_IDDiagnosticoPaciente
+  (lambda (IDDiagnosticoPaciente registros)
+    
+    [if (= (length registros) 1) 
+        
+        ;Si se esta trabajando sobre el ultimo de los registros
+        [if (= IDDiagnosticoPaciente (getIDDiagnosticoPaciente_vv (car registros)))
+            
+            ;Si se ha encontrado una similitud
+            (car registros)
+            
+            ;Si no se ha encontrado similitud
+            null
+            ]
+        
+        ;Si se esta trabajando sobre cualquier otro registro
+        [if (= IDDiagnosticoPaciente (getIDDiagnosticoPaciente_vv (car registros)))
+            
+            ;Si se ha encontrado una similitud
+            (car registros)
+            
+            ;Si no se ha encontrado una similitud
+            (obtener_Registro_TratamientoDiagnosticoPaciente_segun_IDDiagnosticoPaciente IDDiagnosticoPaciente (cdr registros))
+            ]
+        ]
+    )
+  )
+
+#|
+   Función obtener_Registro_TratamientoDiagnosticoPaciente_segun_Fecha
+
+   Descripción: Función utilizada para obtener el registro TratamientoDiagnosticoPaciente relacionado
+   con la fecha de inicio entregado como parametro, recurriendo a una recursión para
+   comparar registro por registro hasta encontrar una similitud
+
+   INPUT:
+    fecha
+    Registros TratamientoDiagnosticoPaciente
+
+   OUTPUT:
+    Registro TratamientoDiagnosticoPaciente
+|#
+(define obtener_Registro_TratamientoDiagnosticoPaciente_segun_Fecha
+  (lambda (fecha registros)
+    
+    [if (= (length registros) 1) 
+        
+        ;Si se esta trabajando sobre el ultimo de los registros
+        [if (string=? fecha (getFechaInicio (car registros)))
+            
+            ;Si se ha encontrado una similitud
+            (car registros)
+            
+            ;Si no se ha encontrado similitud
+            null
+            ]
+        
+        ;Si se esta trabajando sobre cualquier otro registro
+        [if (string=? fecha (getFechaInicio (car registros)))
+            
+            ;Si se ha encontrado una similitud
+            (car registros)
+            
+            ;Si no se ha encontrado una similitud
+            (obtener_Registro_TratamientoDiagnosticoPaciente_segun_Fecha fecha (cdr registros))
+            ]
+        ]
+    )
+  )
+
+#|
+(extraer_Registros_TratamientoDiagnosticoPacientes BDTratamientoDiagnosticoPacientes)
+(car (extraer_Registros_TratamientoDiagnosticoPacientes BDTratamientoDiagnosticoPacientes))
+(isTratamientoDiagnosticoPaciente? (car (extraer_Registros_TratamientoDiagnosticoPacientes BDTratamientoDiagnosticoPacientes)))
+(getIDDiagnosticoPaciente_vv (car (extraer_Registros_TratamientoDiagnosticoPacientes BDTratamientoDiagnosticoPacientes)))
+(getIDTratamiento_vv (car (extraer_Registros_TratamientoDiagnosticoPacientes BDTratamientoDiagnosticoPacientes)))
+(getIDMedico_vv (car (extraer_Registros_TratamientoDiagnosticoPacientes BDTratamientoDiagnosticoPacientes)))
+(getFechaInicio (car (extraer_Registros_TratamientoDiagnosticoPacientes BDTratamientoDiagnosticoPacientes)))
+(getDuracionDias (car (extraer_Registros_TratamientoDiagnosticoPacientes BDTratamientoDiagnosticoPacientes)))
+(getResultado (car (extraer_Registros_TratamientoDiagnosticoPacientes BDTratamientoDiagnosticoPacientes)))
+(obtener_Registro_TratamientoDiagnosticoPaciente_segun_IDDiagnosticoPaciente 23 (extraer_Registros_TratamientoDiagnosticoPacientes BDTratamientoDiagnosticoPacientes))
+(car (obtener_Registro_TratamientoDiagnosticoPaciente_segun_IDDiagnosticoPaciente 23 (extraer_Registros_TratamientoDiagnosticoPacientes BDTratamientoDiagnosticoPacientes)))
+|#
+

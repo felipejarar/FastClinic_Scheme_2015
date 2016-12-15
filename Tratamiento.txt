@@ -1,0 +1,100 @@
+tratamiento(identificador,nombreTratamiento,descripcionTratamiento,nivelDeRiesgo).
+tratamiento(1,nombretratamiento1,descripciontratamiento1,nulo).
+tratamiento(2,nombretratamiento2,descripciontratamiento2,bajo).
+tratamiento(3,nombretratamiento3,descripciontratamiento3,medio).
+tratamiento(4,nombretratamiento4,descripciontratamiento4,alto).
+tratamiento(5,nombretratamiento5,descripciontratamiento5,''muy alto'').
+tratamiento(6,nombretratamiento6,descripciontratamiento6,bajo).
+tratamiento(7,nombretratamiento7,descripciontratamiento7,nulo).
+tratamiento(8,nombretratamiento8,descripciontratamiento8,''muy alto'').
+tratamiento(9,nombretratamiento9,descripciontratamiento9,medio).
+tratamiento(10,nombretratamiento10,descripciontratamiento10,alto).
+tratamiento(11,nombretratamiento11,descripciontratamiento11,nulo).
+tratamiento(12,nombretratamiento12,descripciontratamiento12,bajo).
+tratamiento(13,nombretratamiento13,descripciontratamiento13,medio).
+tratamiento(14,nombretratamiento14,descripciontratamiento14,alto).
+tratamiento(15,nombretratamiento15,descripciontratamiento15,''muy alto'').
+tratamiento(16,nombretratamiento16,descripciontratamiento16,bajo).
+tratamiento(17,nombretratamiento17,descripciontratamiento17,nulo).
+tratamiento(18,nombretratamiento18,descripciontratamiento18,''muy alto'').
+tratamiento(19,nombretratamiento19,descripciontratamiento19,medio).
+tratamiento(20,nombretratamiento20,descripciontratamiento20,alto).
+tratamiento(21,nombretratamiento21,descripciontratamiento21,nulo).
+tratamiento(22,nombretratamiento22,descripciontratamiento22,bajo).
+tratamiento(23,nombretratamiento23,descripciontratamiento23,medio).
+tratamiento(24,nombretratamiento24,descripciontratamiento24,alto).
+tratamiento(25,nombretratamiento25,descripciontratamiento25,''muy alto'').
+tratamiento(26,nombretratamiento26,descripciontratamiento26,bajo).
+tratamiento(27,nombretratamiento27,descripciontratamiento27,nulo).
+tratamiento(28,nombretratamiento28,descripciontratamiento28,''muy alto'').
+tratamiento(29,nombretratamiento29,descripciontratamiento29,medio).
+tratamiento(30,nombretratamiento30,descripciontratamiento30,alto).
+tratamiento(31,nombretratamiento31,descripciontratamiento31,nulo).
+tratamiento(32,nombretratamiento32,descripciontratamiento32,bajo).
+tratamiento(33,nombretratamiento33,descripciontratamiento33,medio).
+tratamiento(34,nombretratamiento34,descripciontratamiento34,alto).
+tratamiento(35,nombretratamiento35,descripciontratamiento35,''muy alto'').
+tratamiento(36,nombretratamiento36,descripciontratamiento36,bajo).
+tratamiento(37,nombretratamiento37,descripciontratamiento37,nulo).
+tratamiento(38,nombretratamiento38,descripciontratamiento38,''muy alto'').
+tratamiento(39,nombretratamiento39,descripciontratamiento39,medio).
+tratamiento(40,nombretratamiento40,descripciontratamiento40,alto).
+tratamiento(41,nombretratamiento41,descripciontratamiento41,nulo).
+tratamiento(42,nombretratamiento42,descripciontratamiento42,bajo).
+tratamiento(43,nombretratamiento43,descripciontratamiento43,medio).
+tratamiento(44,nombretratamiento44,descripciontratamiento44,alto).
+tratamiento(45,nombretratamiento45,descripciontratamiento45,''muy alto'').
+tratamiento(46,nombretratamiento46,descripciontratamiento46,bajo).
+tratamiento(47,nombretratamiento47,descripciontratamiento47,nulo).
+tratamiento(48,nombretratamiento48,descripciontratamiento48,''muy alto'').
+tratamiento(49,nombretratamiento49,descripciontratamiento49,medio).
+tratamiento(50,nombretratamiento50,descripciontratamiento50,alto).
+tratamiento(51,nombretratamiento51,descripciontratamiento51,nulo).
+tratamiento(52,nombretratamiento52,descripciontratamiento52,bajo).
+tratamiento(53,nombretratamiento53,descripciontratamiento53,medio).
+tratamiento(54,nombretratamiento54,descripciontratamiento54,alto).
+tratamiento(55,nombretratamiento55,descripciontratamiento55,''muy alto'').
+tratamiento(56,nombretratamiento56,descripciontratamiento56,bajo).
+tratamiento(57,nombretratamiento57,descripciontratamiento57,nulo).
+tratamiento(58,nombretratamiento58,descripciontratamiento58,''muy alto'').
+tratamiento(59,nombretratamiento59,descripciontratamiento59,medio).
+tratamiento(60,nombretratamiento60,descripciontratamiento60,alto).
+tratamiento(61,nombretratamiento61,descripciontratamiento61,nulo).
+tratamiento(62,nombretratamiento62,descripciontratamiento62,bajo).
+tratamiento(63,nombretratamiento63,descripciontratamiento63,medio).
+tratamiento(64,nombretratamiento64,descripciontratamiento64,alto).
+tratamiento(65,nombretratamiento65,descripciontratamiento65,''muy alto'').
+tratamiento(66,nombretratamiento66,descripciontratamiento66,bajo).
+tratamiento(67,nombretratamiento67,descripciontratamiento67,nulo).
+tratamiento(68,nombretratamiento68,descripciontratamiento68,''muy alto'').
+tratamiento(69,nombretratamiento69,descripciontratamiento69,medio).
+tratamiento(70,nombretratamiento70,descripciontratamiento70,alto).
+tratamiento(71,nombretratamiento71,descripciontratamiento71,nulo).
+tratamiento(72,nombretratamiento72,descripciontratamiento72,bajo).
+tratamiento(73,nombretratamiento73,descripciontratamiento73,medio).
+tratamiento(74,nombretratamiento74,descripciontratamiento74,alto).
+tratamiento(75,nombretratamiento75,descripciontratamiento75,''muy alto'').
+tratamiento(76,nombretratamiento76,descripciontratamiento76,bajo).
+tratamiento(77,nombretratamiento77,descripciontratamiento77,nulo).
+tratamiento(78,nombretratamiento78,descripciontratamiento78,''muy alto'').
+tratamiento(79,nombretratamiento79,descripciontratamiento79,medio).
+tratamiento(80,nombretratamiento80,descripciontratamiento80,alto).
+tratamiento(81,nombretratamiento81,descripciontratamiento81,nulo).
+tratamiento(82,nombretratamiento82,descripciontratamiento82,bajo).
+tratamiento(83,nombretratamiento83,descripciontratamiento83,medio).
+tratamiento(84,nombretratamiento84,descripciontratamiento84,alto).
+tratamiento(85,nombretratamiento85,descripciontratamiento85,''muy alto'').
+tratamiento(86,nombretratamiento86,descripciontratamiento86,bajo).
+tratamiento(87,nombretratamiento87,descripciontratamiento87,nulo).
+tratamiento(88,nombretratamiento88,descripciontratamiento88,''muy alto'').
+tratamiento(89,nombretratamiento89,descripciontratamiento89,medio).
+tratamiento(90,nombretratamiento90,descripciontratamiento90,alto).
+tratamiento(91,nombretratamiento91,descripciontratamiento91,nulo).
+tratamiento(92,nombretratamiento92,descripciontratamiento92,bajo).
+tratamiento(93,nombretratamiento93,descripciontratamiento93,medio).
+tratamiento(94,nombretratamiento94,descripciontratamiento94,alto).
+tratamiento(95,nombretratamiento95,descripciontratamiento95,''muy alto'').
+tratamiento(96,nombretratamiento96,descripciontratamiento96,bajo).
+tratamiento(97,nombretratamiento97,descripciontratamiento97,nulo).
+tratamiento(98,nombretratamiento98,descripciontratamiento98,''muy alto'').
+tratamiento(99,nombretratamiento99,descripciontratamiento99,medio).

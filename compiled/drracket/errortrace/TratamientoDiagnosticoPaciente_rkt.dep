@@ -1,0 +1,1 @@
+("6.1" ("36d6c73107cea19ce70ecba6581b87226a08e8ba" . "197df90e8201b534a8d7c43d11fe19459ce4925e") #"/home/felipe/Escritorio/RACKET/FuncionesGenerales.rkt" #"/home/felipe/.racket/planet/300/6.1/cache/neil/csv.plt/2/0/main.rkt" (collects #"racket" #"runtime-config.rkt") (collects #"racket" #"main.rkt") (collects #"errortrace" #"errortrace-key.rkt"))

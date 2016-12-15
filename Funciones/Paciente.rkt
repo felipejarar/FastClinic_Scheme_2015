@@ -1,0 +1,489 @@
+#lang racket
+
+(require "FuncionesGenerales.rkt")
+(require (planet neil/csv:2:0))
+
+(provide BDPacientes)
+(provide createPaciente)
+(provide isPaciente?)
+(provide getIDPaciente)
+(provide getRUTPaciente)
+(provide getEmailPaciente)
+(provide getNombrePaciente)
+(provide getApellidoPaciente)
+(provide getFecha_NacimientoPaciente)
+(provide setEmailPaciente)
+(provide extraer_Registros_Pacientes)
+(provide obtener_ID_Paciente_segun_RUT)
+(provide obtener_Registro_Paciente_segun_RUT)
+(provide obtener_Registro_Paciente_segun_Email)
+(provide obtener_Registro_Paciente_segun_Nombre_Apellido)
+(provide obtener_Registro_Paciente_segun_ID)
+(provide verificar_Email_En_Registro_Paciente)
+(provide modificar_Email_En_Registro_Paciente)
+
+
+(define BDPacientes (csv->list (open-input-file "Base_de_Datos/Paciente.txt")))
+
+;CONSTRUCTOR:
+(define (createPaciente IDPaciente rut email nombre apellido fecha_Nacimiento)
+        (if (and 
+            (number? IDPaciente) 
+            (> IDPaciente -1)       
+            (string? rut)
+            (string? email)
+            (string? nombre)
+            (string? apellido)
+            (string? fecha_Nacimiento)
+            )
+            
+            (list IDPaciente rut email nombre apellido fecha_Nacimiento)
+            
+            null
+            
+        )
+     
+  );FIN CONSTRUCTOR.
+
+;FUNCIÓN DE PERTENENCIA:
+(define (isPaciente? paciente)
+  (if (list? paciente)
+      (if (= (length paciente) 6)
+          ;Si cumple
+          (if (and
+               (number? (car paciente))
+               (> (car paciente) -1)   
+               (string? (cadr paciente))
+               (string? (caddr paciente))
+               (string? (cadddr paciente))
+               (string? (caddddr paciente))
+               (string? (cadddddr paciente))
+              )
+              
+              #t
+              
+              #f
+              
+              ); fin de la sentecia if n°3.
+          
+          #f
+          
+          ); fin de la sentencia if n°2.
+      
+      #f
+      
+      ); fin de la sentencia if n°1.
+ )
+      
+;SELECTORES:
+(define (getIDPaciente paciente)
+  (if (isPaciente? paciente)
+      (car paciente)
+      -1
+      )
+  )
+
+(define (getRUTPaciente paciente)
+  (if (isPaciente? paciente)
+      (cadr paciente)
+      -1
+      )
+  )
+
+(define (getEmailPaciente paciente)
+  (if (isPaciente? paciente)
+      (caddr paciente)
+      -1
+      )
+  )
+
+(define (getNombrePaciente paciente)
+  (if (isPaciente? paciente)
+      (cadddr paciente)
+      -1
+      )
+  )
+
+(define (getApellidoPaciente paciente)
+    (if (isPaciente? paciente)
+      (caddddr paciente)
+      -1
+      )
+  )
+
+(define (getFecha_NacimientoPaciente paciente)
+    (if (isPaciente? paciente)
+      (cadddddr paciente)
+      -1
+      )
+  )
+
+;MODIFICADORES
+(define (setEmailPaciente paciente nuevoEmail)
+  (if (isPaciente? paciente)
+      
+      (createPaciente
+                            (getIDPaciente paciente) 
+                            (getRUTPaciente paciente) 
+                            nuevoEmail 
+                            (getNombrePaciente paciente) 
+                            (getApellidoPaciente paciente) 
+                            (getFecha_NacimientoPaciente paciente)                   
+      )
+      
+      null
+     
+     )
+  )
+
+
+
+;    Funciones
+
+#|
+    Función extraer_Registros_Pacientes
+
+    Descripción: 
+
+
+    
+    INPUT: 
+      Lista de registros contenidos en la base de datos Pacientes.txt
+
+    OUTPUT:
+      Lista de registros pacientes
+|#
+(define extraer_Registros_Pacientes
+  (lambda (registros)
+    (if (= (length registros) (+ (ctdadRegistros BDPacientes) 1))
+        
+        #|
+        Sentencia IF N°1:
+        En el caso de que se este leyendo la primera linea de los registros obtenidos a partir de la base de datos
+        -> Si cumple: Se ignora el primer registro, el cual solamente contiene una referencia
+        -> Si no cumple: Se construye un paciente a partir del registro considerado, revisando primero si el registro corresponde a un paciente
+        |#
+       
+        (extraer_Registros_Pacientes (cdr registros))
+        
+        (if (= (length registros) 1)
+            
+            #|
+                Sentencia IF N°2:
+                Si se esta considerando el ultimo registro de la base de datos
+                -> Si cumple: Se construye el paciente del ultimo registro
+                -> Si no cumple: Se construye el paciente del registro correspondiente y se intenta pasar al siguiente
+                |#
+            
+            (list (createPaciente    
+             (string->number (car (car registros)))
+             (cadr (car registros))
+             (caddr (car registros))
+             (cadddr (car registros))
+             (caddddr (car registros))
+             (cadddddr (car registros)) 
+             ))
+            
+            (cons (createPaciente    
+                   (string->number (car (car registros)))
+                   (cadr (car registros))
+                   (caddr (car registros))
+                   (cadddr (car registros))
+                   (caddddr (car registros))
+                   (cadddddr (car registros)) 
+                   )
+                  
+                  (extraer_Registros_Pacientes (cdr registros))
+                  )
+            
+            );Fin de la sentencia condicional IF N°2
+        );Fin de la sentencia condificonal IF N°1
+    );Fin de lambda
+  );Fin de define
+
+
+
+
+#|
+    Función obtener_ID_Paciente_segun_RUT
+
+    Descripción: 
+      Función utilizada para retornar el identificador de un paciente comparando un rut ingresado con el rut de todos los registros de los pacientes
+    
+    INPUT: 
+      Rut del paciente
+      Lista de registros de pacientes
+
+    OUTPUT:
+      Identificador del paciente
+|#
+(define obtener_ID_Paciente_segun_RUT
+  
+  (lambda (rut registros)
+    
+    ;Se busca registro por registro hasta encontrar una similitud con respecto al rut    
+    (if (string=? (getRUTPaciente (car registros)) rut)
+        
+        ;En el caso de que se haya encontrado el rut en un registro
+        (getIDPaciente(car registros))
+        
+        ;En el caso de que no se haya encontrado el rut en un registro, se intenta buscar en el siguiente registro (Si es que existe)
+        (if (not (= (length registros) 1) ) 
+            
+            ;En el caso de que exista un siguiente registro.
+            (obtener_ID_Paciente_segun_RUT rut (cdr registros))
+            
+            ;En el caso de que no exista un siguiente registro
+            null
+            
+            )
+        )
+        
+    )
+ )
+
+#|
+    Función obtener_Registro_Paciente_segun_RUT
+
+    Descripción: 
+      Función utilizada para retornar el registro de un paciente comparando un rut ingresado con el rut de todos los registros de los pacientes
+    
+    INPUT: 
+      Rut del paciente
+      Lista de registros de pacientes
+
+    OUTPUT:
+      Registro del paciente
+|#
+(define obtener_Registro_Paciente_segun_RUT
+  
+  (lambda (rut registros)
+    
+    ;Se busca registro por registro hasta encontrar una similitud con respecto al rut    
+    (if (string=? (getRUTPaciente (car registros)) rut)
+        
+        ;En el caso de que se haya encontrado el rut en un registro
+        (car registros)
+        
+        ;En el caso de que no se haya encontrado el rut en un registro, se intenta buscar en el siguiente registro (Si es que existe)
+        (if (not (= (length registros) 1) ) 
+            
+            ;En el caso de que exista un siguiente registro.
+            (obtener_Registro_Paciente_segun_RUT rut (cdr registros))
+            
+            ;En el caso de que no exista un siguiente registro
+            null
+            
+            )
+        )
+        
+    )
+ )
+
+#|
+    Función obtener_Registro_Paciente_segun_Email
+
+    Descripción: 
+      Función utilizada para retornar el registro de un paciente comparando un email ingresado con el email de todos los registros de los pacientes
+    
+    INPUT: 
+      Email del paciente
+      Lista de registros de pacientes
+
+    OUTPUT:
+      Registro del paciente
+|#
+(define obtener_Registro_Paciente_segun_Email
+  
+  (lambda (email registros)
+    
+    (if (string=? (getEmailPaciente (car registros)) email)
+            
+        ;En el caso de que se haya encontrado el email en un registro
+        (car registros)
+        
+        ;En el caso de que no se haya encontrado el email en un registro, se intenta buscar en el siguiente registro (Si es que existe)
+        (if (not (= (length registros) 1) ) 
+            
+            ;En el caso de que exista un siguiente registro.
+            (obtener_Registro_Paciente_segun_Email email (cdr registros))
+            
+            ;En el caso de que no exista un siguiente registro
+            null
+            
+            )
+        )
+       
+    )
+ )
+
+(define obtener_Registro_Paciente_segun_ID
+  
+  (lambda (ID registros)
+    
+    (if (= (getIDPaciente (car registros)) ID)
+            
+        ;En el caso de que se haya encontrado el ID en un registro
+        (car registros)
+        
+        ;En el caso de que no se haya encontrado el ID en un registro, se intenta buscar en el siguiente registro (Si es que existe)
+        (if (not (= (length registros) 1) ) 
+            
+            ;En el caso de que exista un siguiente registro.
+            (obtener_Registro_Paciente_segun_ID ID (cdr registros))
+            
+            ;En el caso de que no exista un siguiente registro
+            null
+            
+            )
+        )
+       
+    )
+ )
+
+
+
+
+#|
+    Función obtener_Registro_Paciente_segun_Nombre_Apellido
+
+    Descripción: 
+      Función utilizada para retornar el registro de un paciente en los registros relacionado al nombre y apellido
+      entregado como entrada. Para ello recurre una recursión lineal del tipo no por cola, analizando registro por 
+      registro hasta encontrar el deseado
+    
+    INPUT: 
+      Nombre del paciente
+      Apellido del paciente
+      Lista de registros de pacientes
+
+    OUTPUT:
+      Registro del paciente
+|#
+(define obtener_Registro_Paciente_segun_Nombre_Apellido
+  (lambda (nombre apellido registros)
+    
+    [if (= (length registros) 1)
+        
+        ;Se esta trabajando sobre el ultimo registro
+        [if (and (string=? nombre (getNombrePaciente (car registros))) (string=? apellido (getApellidoPaciente (car registros))))
+            
+            ;Se encontro una similitud
+            (car registros)
+            
+            ;No se encontro una similitud
+            null
+            
+            ]
+         
+        ;Se esta trabajando sobre cualquier otro registro
+        [if (and (string=? nombre (getNombrePaciente (car registros))) (string=? apellido (getApellidoPaciente (car registros))))
+            
+            ;Se encontro una similitud
+            (car registros)
+           
+            ;No se encontro una similitud
+            (obtener_Registro_Paciente_segun_Nombre_Apellido nombre apellido (cdr registros))
+            
+            ]
+        ]
+    )
+  )
+
+#|
+   Función verificar_Email_En_Registro_Paciente
+
+   Descripción:
+     Función utilizada para retornar Verdadero o Falso, dependiendo de si existe un email en una lista de registros pacientes
+
+   INPUT:
+     Listas de registros pacientes
+     Mail 
+
+   OUTPUT:
+     Verdadero o Falso
+|#
+(define verificar_Email_En_Registro_Paciente
+  (lambda (mail registros)
+    (if (= (length registros) 1)
+        
+        ;En el caso de que se este considerando el ultimo registro de la lista
+        (if (equal? mail (getEmailPaciente (car registros)))
+            ;En el caso de que el ultimo registro contenga el mail ingresado
+            #t
+            ;En el caso de que el ultimo registro NO contenga el mail ingresado
+            #f
+        )
+        
+        ;En el caso de que se este considerando cualquier otro registro
+        (if (equal? mail (getEmailPaciente (car registros)))
+            ;En el caso de que el registro contenga el mail ingresado
+            #t
+            ;En el caso de que no lo tenga, se continua con el siguiente registro
+            (verificar_Email_En_Registro_Paciente mail (cdr registros) )
+            )
+        )
+    )
+  )
+
+#|
+   Función modificar_Email_En_Registro_Paciente
+
+   Descripción:
+     Función utilizada para retornar la lista de registros, cambiando el email de uno de ellos. Asumiendo de que el cambio es valido, es decir,
+     que ya se sabe que el email antiguo existe en la lista de registros y que el email nuevo puede reemplazarlo.
+
+   INPUT:
+     Listas de registros pacientes
+     Mail Antiguo
+     Mail Nuevo
+   
+   OUTPUT:
+     Listas de registros pacientes modificadas
+|#
+(define modificar_Email_En_Registro_Paciente
+  (lambda (mailAntiguo mailNuevo registros)
+    
+    (if (= (length registros) 1)
+        
+       ;En el caso de que se este considerando el ultimo registro de la lista ingresada:
+        (if (equal? (car registros) (obtener_Registro_Paciente_segun_Email mailAntiguo registros))
+            ;En el caso de que el registro considerado coincida con el registro a modificar
+            (list (setEmailPaciente (car registros) mailNuevo))
+            ;En el caso de que ambos registros no coindican:
+            (list (car registros))
+            )
+        
+       ;En el caso de que no se este considerando el ultimo registro
+        (if (equal? (car registros) (obtener_Registro_Paciente_segun_Email mailAntiguo registros))
+            ;En el caso de que el registro considerado coincida con el registro a modificar
+            (cons (setEmailPaciente (car registros) mailNuevo) (cdr registros))
+            ;En el caso de que ambos registros no coindican, se pasa a trabajar en el siguiente registro
+            (cons (car registros) (modificar_Email_En_Registro_Paciente mailAntiguo mailNuevo (cdr registros)))
+           )
+        )
+    )
+  )
+                     
+                     
+
+#|
+(extraer_Registros_Pacientes BDPacientes)
+(obtener_Registro_Paciente_segun_RUT "rutPaciente0" registros_Pacientes)
+(obtener_Registro_Paciente_segun_Email "correo0@paciente.com" registros_Pacientes)
+(obtener_Nombre_Paciente_Segun_Registro (obtener_Registro_Paciente_segun_RUT "rutPaciente0" registros_Pacientes))
+
+(verificar_Email_En_Registro_Paciente "correo0@paciente.com" registros_Pacientes)
+(obtener_Registro_Paciente_segun_Email "correo0@paciente.com" registros_Pacientes)
+|#
+
+
+
+
+  
+  
+
+
+
+
+   

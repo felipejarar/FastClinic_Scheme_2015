@@ -1,0 +1,281 @@
+#lang racket
+
+(require "FuncionesGenerales.rkt")
+(require (planet neil/csv:2:0))
+
+(define BDDoctores (csv->list (open-input-file "Doctor.txt")))
+
+;CONSTRUCTOR:
+(define (createDoctor IDDoctor rut email nombre apellido especialidad)
+        (if (and 
+            (number? IDDoctor) 
+            (> IDDoctor -1)       
+            (string? rut)
+            (string? email)
+            (string? nombre)
+            (string? apellido)
+            (string? especialidad)
+            )
+            
+            (list IDDoctor rut email nombre apellido especialidad)
+            
+            null
+            
+        )
+ )
+
+;FUNCIÓN DE PERTENENCIA:
+(define (isDoctor? doctor)
+  (if (list? doctor)
+      (if (= (length doctor) 6)
+          ;Si cumple
+          (if (and
+               (number? (car doctor))
+               (string? (cadr doctor))
+               (string? (caddr doctor))
+               (string? (cadddr doctor))
+               (string? (caddddr doctor))
+               (string? (cadddddr doctor))
+              )
+              
+              #t
+              
+              #f
+              
+              ); FIN DE LA SENTENCIA IF N°3
+          
+          #f
+          
+          ); FIN DE LA SENTENCIA IF N°2
+      
+      #f
+      
+      ); FIN DE LA SENTENCIA IF N°1
+ )
+
+;SELECTORES:
+(define (getIDDoctor doctor)
+  (if (isDoctor? doctor)
+      (car doctor)
+      -1
+  )
+)
+
+(define (getRUTDoctor doctor)
+  (if (isDoctor? doctor)
+      (cadr doctor)
+      -1
+  )
+)
+
+(define (getEmailDoctor doctor)
+  (if (isDoctor? doctor)
+      (caddr doctor)
+      -1
+  )
+)
+
+(define (getNombreDoctor doctor)
+    (if (isDoctor? doctor)
+      (cadddr doctor)
+      -1
+  )
+)
+
+(define (getApellidoDoctor doctor)
+  (if (isDoctor? doctor)
+      (caddddr doctor)
+      -1
+  )
+)
+
+(define (getEspecialidadDoctor doctor)
+    (if (isDoctor? doctor)
+      (cadddddr doctor)
+      -1
+  )
+)
+
+;    Funciones
+
+#|
+    Función extraer_Registros_Doctores
+
+    Descripción: 
+      Función utilizada para retornar una lista de doctores construidos a partir de los registros contenidos en la base de datos Doctor.txt
+    
+    INPUT: 
+      Lista de registros contenidos en la base de datos Doctor.txt
+
+    OUTPUT:
+      Lista de doctores
+|#
+(define extraer_Registros_Doctores
+  (lambda (registros)
+    (if (= (length registros) (+ (ctdadRegistros BDDoctores) 1))
+        
+        #|
+        Sentencia IF N°1:
+        En el caso de que se este leyendo la primera linea de los registros obtenidos a partir de la base de datos
+        -> Si cumple: Se ignora el primer registro, el cual solamente contiene una referencia
+        -> Si no cumple: Se construye un doctor a partir del registro considerado, revisando primero si el registro corresponde a un doctor
+        |#
+       
+        (extraer_Registros_Doctores (cdr registros))
+        
+        (if (= (length registros) 1)
+            
+            #|
+                Sentencia IF N°2:
+                Si se esta considerando el ultimo registro de la base de datos
+                -> Si cumple: Se construye el doctor del ultimo registro
+                -> Si no cumple: Se construye el doctor del registro correspondiente y se intenta pasar al siguiente
+                |#
+            
+            (list (createDoctor
+             (string->number (car (car registros)))
+             (cadr (car registros))
+             (caddr (car registros))
+             (cadddr (car registros))
+             (caddddr (car registros))
+             (cadddddr (car registros)) 
+             ))
+            
+            (cons (createDoctor    
+                   (string->number (car (car registros)))
+                   (cadr (car registros))
+                   (caddr (car registros))
+                   (cadddr (car registros))
+                   (caddddr (car registros))
+                   (cadddddr (car registros)) 
+                   )
+                  
+                  (extraer_Registros_Doctores (cdr registros))
+                  )
+            
+            );Fin de la sentencia condicional IF N°2
+        );Fin de la sentencia condificonal IF N°1
+    );Fin de lambda
+  );Fin de define
+
+
+#|
+    Función obtener_ID_Doctor_segun_RUT
+
+    Descripción: 
+      Función utilizada para retornar el identificador de un doctor comparando un rut ingresado con el rut de todos los registros de los doctores
+    
+    INPUT: 
+      Rut del doctor
+      Lista de registros de doctores
+
+    OUTPUT:
+      Identificador del doctor
+|#
+(define obtener_ID_Doctor_segun_RUT
+  
+  (lambda (rut registros)
+    
+    ;En el caso de que se este leyendo la primera linea del archivo
+    
+    (if (= (length registros) (+ (ctdadRegistros BDDoctores) 1))
+        
+        ;Se ignora la primera linea de los registros
+        
+        (obtener_ID_Doctor_segun_RUT rut (cdr registros))
+          
+        ;En el caso de que no se este leyendo la primera linea. Se busca registro por registro hasta encontrar una similitud con respecto al rut    
+        (if (string=? (getRUTDoctor (car registros)) rut)
+            
+            ;En el caso de que se haya encontrado el rut en un registro
+            (getIDDoctor (car registros))
+            
+            ;En el caso de que no se haya encontrado el rut en un registro, se intenta buscar en el siguiente registro (Si es que existe)
+            (if (not (= (length registros) 1) ) 
+                
+                ;En el caso de que exista un siguiente registro.
+                (obtener_ID_Doctor_segun_RUT rut (cdr registros))
+                
+                ;En el caso de que no exista un siguiente registro
+                null
+
+                )
+            )
+        )
+    )
+ )
+
+#|
+    Función obtener_Registro_Doctor_segun_RUT
+
+    Descripción: 
+      Función utilizada para retornar el registro de un doctor comparando un rut ingresado con el rut de todos los registros de los doctores
+    
+    INPUT: 
+      Rut del doctor
+      Lista de registros de doctores
+
+    OUTPUT:
+      Registro del doctor
+|#
+(define obtener_Registro_Doctor_segun_RUT
+  
+  (lambda (rut registros)
+    
+    ;En el caso de que se este leyendo la primera linea del archivo 
+    (if (= (length registros) (+ (ctdadRegistros BDDoctores) 1))
+        
+        ;Se ignora la primera linea de los registros
+        
+        (obtener_Registro_Doctor_segun_RUT rut (cdr registros))
+          
+        ;En el caso de que no se este leyendo la primera linea. Se busca registro por registro hasta encontrar una similitud con respecto al rut    
+        (if (string=? (getRUTDoctor (car registros)) rut)
+            
+            ;En el caso de que se haya encontrado el rut en un registro
+            (car registros)
+            
+            ;En el caso de que no se haya encontrado el rut en un registro, se intenta buscar en el siguiente registro (Si es que existe)
+            (if (not (= (length registros) 1) ) 
+                
+                ;En el caso de que exista un siguiente registro.
+                (obtener_Registro_Doctor_segun_RUT rut (cdr registros))
+                
+                ;En el caso de que no exista un siguiente registro
+                null
+
+                )
+            )
+        )
+    )
+ )
+
+#|
+    Función obtener_Especialidad_Doctor_Segun_Registro
+
+    Descripción: 
+      Función utilizada para retornar la especialidad de un doctor dado su registro
+    
+    INPUT: 
+      Registro del doctor
+
+    OUTPUT:
+      Especialidad del doctor
+|#
+(define obtener_Especialidad_Doctor_Segun_Registro
+  (lambda (registro)
+    (getEspecialidadDoctor registro)
+    )
+  )
+
+(define doctor (cadr (extraer_Registros_Doctores BDDoctores) ) )
+(getIDDoctor doctor) 
+(getRUTDoctor doctor) 
+(getEmailDoctor doctor) 
+(getNombreDoctor doctor) 
+(getApellidoDoctor doctor) 
+(getEspecialidadDoctor doctor)
+
+(obtener_ID_Doctor_segun_RUT "rutdoctor70" (extraer_Registros_Doctores BDDoctores))
+(obtener_Registro_Doctor_segun_RUT "rutdoctor70" (extraer_Registros_Doctores BDDoctores))
+(obtener_Especialidad_Doctor_Segun_Registro (obtener_Registro_Doctor_segun_RUT "rutdoctor2414" (extraer_Registros_Doctores BDDoctores)))

@@ -1,0 +1,493 @@
+#lang racket
+
+(require "FuncionesGenerales.rkt")
+(require (planet neil/csv:2:0))
+
+(provide BDDiagnosticosPacientes)
+(provide createDiagnosticoPaciente)
+(provide isDiagnosticoPaciente?)
+(provide getIDDiagnosticoPaciente_vvv)
+(provide getIDPaciente_vvv)
+(provide getIDDiagnostico_vvv)
+(provide getFechaDiagnostico)
+(provide getIDDoctorDiagnostico)
+(provide getEstadoDiagnostico)
+(provide getFechaAlta)
+(provide getIDDoctorAlta)
+(provide getDetalleAlta)
+(provide setIDDoctorAlta)
+(provide extraer_Registros_DiagnosticoPacientes)
+(provide obtener_Identificadores_Doctor_Alta)
+(provide obtener_Registros_DiagnosticoPaciente_Segun_IDPaciente)
+(provide obtener_Registros_DiagnosticoPaciente_Segun_FechaAlta)
+(provide obtener_Registros_DiagnosticoPaciente_Segun_IDDoctorAlta_IDDiagnostico)
+(provide modificar_IDDoctorAlta_Registro_DiagnosticoPaciente_Segun_Registro)
+
+(define BDDiagnosticosPacientes (csv->list (open-input-file "Base_de_Datos/DiagnosticoPaciente.txt")))
+
+;CONSTRUCTOR: Función para construir un registro DiagnosticoPaciente, verificando si los datos con los que se pretende construir el registro son correctos
+(define (createDiagnosticoPaciente 
+         IDDiagnosticoPaciente 
+         IDPaciente 
+         IDDiagnostico 
+         fechaDiagnostico 
+         IDDoctorDiagnostico
+         estadoDiagnostico
+         fechaAlta
+         IDDoctorAlta
+         detalleAlta)
+  
+        (if (and 
+            (number? IDDiagnosticoPaciente) 
+            (> IDDiagnosticoPaciente -1)      
+            (number? IDPaciente) 
+            (> IDPaciente -1)     
+            (number? IDDiagnostico) 
+            (> IDDiagnostico -1)       
+            (string? fechaDiagnostico)
+            (number? IDDoctorDiagnostico) 
+            (> IDDoctorDiagnostico -1)
+            (string? estadoDiagnostico)
+            (string? fechaAlta)
+            (number? IDDoctorAlta) 
+            (> IDDoctorAlta -1)
+            (string? detalleAlta)
+            )
+            
+            (list IDDiagnosticoPaciente 
+                           IDPaciente 
+                           IDDiagnostico 
+                           fechaDiagnostico 
+                           IDDoctorDiagnostico
+                           estadoDiagnostico
+                           fechaAlta
+                           IDDoctorAlta
+                           detalleAlta)
+            
+            null
+            
+        )
+     
+  );FIN CONSTRUCTOR.
+
+;FUNCIÓN DE PERTENENCIA: Función para verificar si un registro corresponde efectivamente a un DiagnosticoPaciente.
+(define (isDiagnosticoPaciente? diagnosticoPaciente)
+  (if (list? diagnosticoPaciente)
+      (if (= (length diagnosticoPaciente) 9)
+          ;Si cumple
+          (if (and
+               ;IDDiagnosticoPaciente
+               (number? (car diagnosticoPaciente))
+               (> (car diagnosticoPaciente) -1)  
+               ;IDPaciente
+               (number? (cadr diagnosticoPaciente))
+               (> (cadr diagnosticoPaciente) -1)
+               ;IDDiagnostico
+               (number? (caddr diagnosticoPaciente))
+               (> (caddr diagnosticoPaciente) -1)
+               ;fechaDiagnostico
+               (string? (cadddr diagnosticoPaciente))
+               ;IDDoctorDiagnostico
+               (number? (caddddr diagnosticoPaciente))
+               (> (caddddr diagnosticoPaciente) -1)
+               ;estadoDiagnostico
+               (string? (cadddddr diagnosticoPaciente))
+               ;fechaAlta
+               (string? (caddddddr diagnosticoPaciente))
+               ;IDDoctorAlta
+               (number? (cadddddddr diagnosticoPaciente))
+               (> (cadddddddr diagnosticoPaciente) -1)
+               ;detalleAlta
+               (string? (caddddddddr diagnosticoPaciente))
+               
+              )
+              
+              #t
+              
+              #f
+              
+              ); fin de la sentecia if n°3.
+          
+          #f
+          
+          ); fin de la sentencia if n°2.
+      
+      #f
+      
+      ); fin de la sentencia if n°1.
+ )
+
+;Selectores: Funciones para obtener cierto dato de un registro, preguntando primero si el registro corresponde a un DiagnosticoPaciente.
+(define (getIDDiagnosticoPaciente_vvv diagnosticoPaciente)
+    (if (isDiagnosticoPaciente? diagnosticoPaciente)
+      (car diagnosticoPaciente)
+      -1
+      )
+  )
+
+(define (getIDPaciente_vvv diagnosticoPaciente)
+    (if (isDiagnosticoPaciente? diagnosticoPaciente)
+      (cadr diagnosticoPaciente)
+      -1
+      )
+  )
+
+(define (getIDDiagnostico_vvv diagnosticoPaciente)
+    (if (isDiagnosticoPaciente? diagnosticoPaciente)
+      (caddr diagnosticoPaciente)
+      -1
+      )
+  )
+
+(define (getFechaDiagnostico diagnosticoPaciente)
+    (if (isDiagnosticoPaciente? diagnosticoPaciente)
+      (cadddr diagnosticoPaciente)
+      -1
+      )
+  )
+
+(define (getIDDoctorDiagnostico diagnosticoPaciente)
+    (if (isDiagnosticoPaciente? diagnosticoPaciente)
+      (caddddr diagnosticoPaciente)
+      -1
+      )
+  )
+
+(define (getEstadoDiagnostico diagnosticoPaciente)
+    (if (isDiagnosticoPaciente? diagnosticoPaciente)
+      (cadddddr diagnosticoPaciente)
+      -1
+      )
+  )
+
+(define (getFechaAlta diagnosticoPaciente)
+    (if (isDiagnosticoPaciente? diagnosticoPaciente)
+      (caddddddr diagnosticoPaciente)
+      -1
+      )
+  )
+
+(define (getIDDoctorAlta diagnosticoPaciente)
+    (if (isDiagnosticoPaciente? diagnosticoPaciente)
+      (cadddddddr diagnosticoPaciente)
+      -1
+      )
+  )
+
+(define (getDetalleAlta diagnosticoPaciente)
+    (if (isDiagnosticoPaciente? diagnosticoPaciente)
+      (caddddddddr diagnosticoPaciente)
+      -1
+      )
+  )
+
+;Modificadores: Funciones para modificar cierto dato de un registro, preguntando primero si el registro corresponde a un DiagnosticoPaciente
+(define (setIDDoctorAlta registro IDDoctor)
+  (if (isDiagnosticoPaciente? registro)
+      
+      (createDiagnosticoPaciente 
+         (getIDDiagnosticoPaciente_vvv registro) 
+         (getIDPaciente_vvv registro) 
+         (getIDDiagnostico_vvv registro) 
+         (getFechaDiagnostico registro) 
+         (getIDDoctorDiagnostico registro)
+         (getEstadoDiagnostico registro)
+         (getFechaAlta registro)
+         IDDoctor
+         (getDetalleAlta registro)
+         )
+    
+      null
+     
+     )
+  )
+
+
+;Funciones:
+
+#|
+    Función extraer_Registros_DiagnosticoPacientes
+
+    Descripción: 
+      Función utilizada para retornar una lista de diagnosticoPacientes construidos a partir de los registros contenidos en la base de datos DiagnosticoPaciente.txt. Se basa en el uso de una
+      aplicación de recursión lineal, no por cola, para poder extraer cada uno de los registros y construir con ellos los diferentes diagnosticoPacientes contenidos en la base de datos.
+      Estos son agregados a una lista, a la cual se retorna tras finalizar la ejecución de la función en el caso de que todo salga bien. Por otro lado, si algún error ocurre
+      durante el proceso, se devuelve una lista vacia (null). 
+
+    INPUT: 
+      Lista de registros contenidos en la base de datos DiagnosticoPaciente.txt
+
+    OUTPUT:
+      Lista de diagnosticoPacientes
+|#
+(define extraer_Registros_DiagnosticoPacientes
+  (lambda (registros)
+    (if (= (length registros) (+ (ctdadRegistros BDDiagnosticosPacientes) 1))
+        
+        #|
+        Sentencia IF N°1:
+        En el caso de que se este leyendo la primera linea de los registros obtenidos a partir de la base de datos
+        -> Si cumple: Se ignora el primer registro, el cual solamente contiene una referencia
+        -> Si no cumple: Se construye un diagnosticoPaciente a partir del registro considerado, revisando primero si el registro corresponde a un diagnosticoPaciente
+        |#
+       
+        (extraer_Registros_DiagnosticoPacientes (cdr registros))
+        
+        (if (= (length registros) 1)
+            
+            #|
+                Sentencia IF N°2:
+                Si se esta considerando el ultimo registro de la base de datos
+                -> Si cumple: Se construye el diagnosticoPaciente del ultimo registro
+                -> Si no cumple: Se construye el diagnosticoPaciente del registro correspondiente y se intenta pasar al siguiente
+                |#
+            
+            (list (createDiagnosticoPaciente
+                   ;IDDiagnosticoPaciente
+                   (string->number (car (car registros)))
+                   ;IDPaciente
+                   (string->number (cadr (car registros)))
+                   ;IDDiagnostico
+                   (string->number (caddr (car registros)))
+                   ;fechaDiagnostico
+                   (cadddr (car registros))
+                   ;IDDoctorDiagnostico
+                   (string->number(caddddr (car registros)))
+                   ;estadoDiagnostico
+                   (cadddddr (car registros))
+                   ;fechaAlta
+                   (caddddddr (car registros))
+                   ;IDDoctorAlta
+                   (string->number(cadddddddr (car registros)))
+                   ;detalleAlta
+                   (caddddddddr (car registros))        
+                   )
+                  )
+            
+            (cons (createDiagnosticoPaciente
+                   ;IDDiagnosticoPaciente
+                   (string->number (car (car registros)))
+                   ;IDPaciente
+                   (string->number (cadr (car registros)))
+                   ;IDDiagnostico
+                   (string->number (caddr (car registros)))
+                   ;fechaDiagnostico
+                   (cadddr (car registros))
+                   ;IDDoctorDiagnostico
+                   (string->number(caddddr (car registros)))
+                   ;estadoDiagnostico
+                   (cadddddr (car registros))
+                   ;fechaAlta
+                   (caddddddr (car registros))
+                   ;IDDoctorAlta
+                   (string->number(cadddddddr (car registros)))
+                   ;detalleAlta
+                   (caddddddddr (car registros))        
+                   )
+                  
+                  (extraer_Registros_DiagnosticoPacientes (cdr registros))
+                  )
+            
+            );Fin de la sentencia condicional IF N°2
+        );Fin de la sentencia condificonal IF N°1
+    );Fin de lambda
+  );Fin de define
+
+#|
+    Función obtener_Identificadores_Doctor_Alta
+
+    Descripción: 
+      Función utilizada para retornar una lista con todos los identificadores de los doctores que dan el alta en los registros diagnosticoPaciente. Se utiliza una recursión del tipo
+      lineal no por cola para poder unir todos los identificadores de cada uno de los registros.
+    
+    INPUT: 
+      Lista de registros diagnosticoPaciente
+
+    OUTPUT:
+      Lista de identificadores doctor alta
+|#
+(define obtener_Identificadores_Doctor_Alta
+  (lambda (registros)
+    (if (= (length registros) 1)
+        ;Se esta trabajando sobre el ultimo registro
+        (list (getIDDoctorAlta (car registros)))
+        
+        ;Se esta trabajando sobre cualquier otro registro
+        (cons (getIDDoctorAlta (car registros)) (obtener_Identificadores_Doctor_Alta (cdr registros)))
+        )
+    )
+  )
+
+#|
+    Función obtener_Registros_DiagnosticoPaciente_Segun_IDPaciente
+
+    Descripción: 
+      Función utilizada para retornar todos los registros relacionados con el identificador de un paciente. Para ello se utiliza una recursión del tipo lineal no por cola para analizar 
+      registro por registro y enlistar todos los que contengan al identificador ingresado como entrada.
+    
+    INPUT: 
+      Identificador del paciente
+      Lista de registros diagnosticoPaciente
+
+    OUTPUT:
+      Lista de registros relacionados con el paciente
+|#
+(define obtener_Registros_DiagnosticoPaciente_Segun_IDPaciente
+  (lambda (IDPaciente registros)
+  
+    [if (= (length registros) 1) 
+        
+        ;Si se esta trabajando sobre el ultimo de los registros
+        [if (= IDPaciente (getIDPaciente_vvv (car registros)))
+            
+            ;Si se ha encontrado una similitud
+            (list (car registros))
+            
+            ;Si no se ha encontrado similitud
+            null
+            ]
+        
+        ;Si se esta trabajando sobre cualquier otro registro
+        [if (= IDPaciente (getIDPaciente_vvv (car registros)))
+            
+            ;Si se ha encontrado una similitud
+            (cons (car registros) (obtener_Registros_DiagnosticoPaciente_Segun_IDPaciente IDPaciente (cdr registros)))
+            
+            ;Si no se ha encontrado una similitud
+            (obtener_Registros_DiagnosticoPaciente_Segun_IDPaciente IDPaciente (cdr registros))
+            ]
+        ]
+    )
+  )
+
+#|
+    Función obtener_Registros_DiagnosticoPaciente_Segun_IDDoctorAlta_IDDiagnostico
+
+    Descripción: 
+      Función utilizada para retornar todos los registros relacionados con el identificador de un medico que da el alta y el identificador de un diagnostico.
+      Para ello se utiliza una recursión del tipo lineal no por cola para analizar registro por registro y enlistar todos los que contengan al identificador
+      ingresado como entrada.
+    
+    INPUT: 
+      Identificador del medico de alta
+      Identificador del diagnostico
+      Lista de registros diagnosticoPaciente
+
+    OUTPUT:
+      Lista de registros relacionados con el medico de alta y diagnostico
+|#
+(define obtener_Registros_DiagnosticoPaciente_Segun_IDDoctorAlta_IDDiagnostico
+  (lambda (IDMedicoAlta IDDiagnostico registros)
+  
+    [if (= (length registros) 1) 
+        
+        ;Si se esta trabajando sobre el ultimo de los registros
+        [if (and (= IDMedicoAlta (getIDDoctorAlta (car registros))) (= IDDiagnostico (getIDDiagnostico_vvv (car registros))))
+            
+            ;Si se ha encontrado una similitud
+            (list (car registros))
+            
+            ;Si no se ha encontrado similitud
+            null
+            ]
+        
+        ;Si se esta trabajando sobre cualquier otro registro
+        [if (and (= IDMedicoAlta (getIDDoctorAlta (car registros))) (= IDDiagnostico (getIDDiagnostico_vvv (car registros))))
+            
+            ;Si se ha encontrado una similitud
+            (cons (car registros) (obtener_Registros_DiagnosticoPaciente_Segun_IDDoctorAlta_IDDiagnostico IDMedicoAlta IDDiagnostico (cdr registros)))
+            
+            ;Si no se ha encontrado una similitud
+            (obtener_Registros_DiagnosticoPaciente_Segun_IDDoctorAlta_IDDiagnostico IDMedicoAlta IDDiagnostico (cdr registros))
+            ]
+        ]
+    )
+  )
+
+#|
+    Función obtener_Registros_DiagnosticoPaciente_Segun_FechaAlta
+
+    Descripción: 
+      Función utilizada para retornar todos los registros relacionados con una fecha de alta. Para ello se utiliza una recursión del tipo lineal no por cola para analizar 
+      registro por registro y enlistar todos los que contengan a la fecha ingresada como entrada. Como un paciente no puede ser dado de alta dos veces en un mismo dia,
+      se asume que solo hay una fecha de alta para cierta cantidad de registros
+    
+    INPUT: 
+      
+      Fecha de alta
+      Lista de registros diagnosticoPaciente
+
+    OUTPUT:
+      Lista de registros relacionados con la fecha de alta
+|#
+(define obtener_Registros_DiagnosticoPaciente_Segun_FechaAlta
+  (lambda (fechaAlta registros)
+  
+    [if (= (length registros) 1) 
+        
+        ;Si se esta trabajando sobre el ultimo de los registros
+        [if (string=? fechaAlta (getFechaAlta (car registros)))
+            
+            ;Si se ha encontrado una similitud
+            (car registros)
+            
+            ;Si no se ha encontrado similitud
+            null
+            ]
+        
+        ;Si se esta trabajando sobre cualquier otro registro
+        [if (string=? fechaAlta (getFechaAlta (car registros)))
+            
+            ;Si se ha encontrado una similitud
+            (car registros)
+            
+            ;Si no se ha encontrado una similitud
+            (obtener_Registros_DiagnosticoPaciente_Segun_FechaAlta fechaAlta (cdr registros))
+            ]
+        ]
+    )
+  )
+
+#|
+    Función modificar_IDDoctorAlta_Registro_DiagnosticoPaciente_Segun_Registro
+
+    Descripción: 
+      Función utilizada para retornar una lista de todos los registros, con la diferencia de que el doctor de alta de uno de ellos
+      sea moficiado. Para acceder registro por registro, se recurre a una recursión lineal no por cola.
+    
+    INPUT: 
+      Identificador Medico reemplazante
+      Registro a modificar
+      Lista de registros diagnosticoPaciente
+
+    OUTPUT:
+      Lista de registros modificada
+|#
+(define modificar_IDDoctorAlta_Registro_DiagnosticoPaciente_Segun_Registro
+  (lambda (IDMedicoAlta registro registros)
+    
+    [if (= (length registros) 1 )
+        
+        ;Se esta trabajando sobre el ultimo de los registros
+        [if (equal? (car registros) registro)
+            
+            ;Se ha encontrado el registro a modificar
+            (list (setIDDoctorAlta (car registros) IDMedicoAlta))
+            
+            ;Si no, entonces se retorna el registro sin modificar
+            (list (car registros))
+            ]
+        
+        ;Se esta trabajando sobre cualquier otro registro
+        [if (equal? (car registros) registro)
+            
+            ;Se ha encontrado el registro a modificar
+            (cons (setIDDoctorAlta (car registros) IDMedicoAlta) (modificar_IDDoctorAlta_Registro_DiagnosticoPaciente_Segun_Registro IDMedicoAlta registro (cdr registros)))
+            
+            ;Se no, entonces no se realiza modificación sobre el registro
+            (cons (car registros) (modificar_IDDoctorAlta_Registro_DiagnosticoPaciente_Segun_Registro IDMedicoAlta registro (cdr registros)))
+            
+            ]
+        ]
+    )
+  )
